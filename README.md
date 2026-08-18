@@ -80,6 +80,8 @@ serverconsole-deploy/
 ├── voice-relay/         # 语音中继
 │   ├── Dockerfile
 │   └── voice_relay.py
+├── scripts/             # 运维脚本
+│   └── container-guard.sh  # 容器守护（cron 每2分钟检查并拉起异常容器）
 └── data/                # 运行时数据（自动生成）
 ```
 
@@ -91,6 +93,7 @@ serverconsole-deploy/
 
 ## 📜 更新日志
 
+- **v1.2.1** (2026-08-19)：新增容器守护脚本 `scripts/container-guard.sh`（cron 每 2 分钟检测，容器未运行或健康检查 unhealthy 自动拉起/重启，覆盖全部 7 个容器）。
 - **v1.2.0** (2026-08-19)：语音通话升级标准 Realtime 接口（JSON 控制帧 + 音频帧），支持服务商选择（千问/智谱/阿里云/腾讯云/OpenAI/自定义），API Key 可后填；voice_relay 重写为标准语音网关（未配置 Key 时返回明确提示）；管理页语音设置改为服务商下拉 + 模型/音色/语言；获取模型接口地址自动归一化（支持填完整 chat/completions 端点）。
 - **v1.1.0** (2026-08-18)：面板运维脚本页内置 16 个默认脚本（一键重启 AstrBot/NapCat/GsCore、容器状态总览、查看日志、磁盘检查、备份 AstrBot/面板、清理容器日志、网络连通性检查、镜像列表、一键重启全部、内存 TOP10、QQ 运行状态等），支持用户自定义；首页右上角时间改为 24 小时制；nginx 代理超时提升至 300s（支持长时备份脚本）；备份脚本自动保留最近 3 份防磁盘膨胀。
 - **v1.0.0** (2026-08-18)：初始发布。全家桶 docker-compose 一键部署；面板去品牌化可自定义名称；App 支持本地上传背景图；修复 App 文件选择器。
