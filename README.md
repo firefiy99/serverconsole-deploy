@@ -52,7 +52,7 @@ bash install.sh
 
 ### 手机 App 连接
 
-1. 下载 ServerConsole App（见下方 Release）
+1. 下载 ServerConsole App：[点此下载最新版 APK](https://github.com/firefiy99/serverconsole-deploy/releases/latest)（或到 [Releases 页面](https://github.com/firefiy99/serverconsole-deploy/releases) 选版本）
 2. 打开 App → 配置服务器地址 `http://你的IP:8000` + 密钥 `AGENT_KEY`
 3. 完成，随时管理你的服务器
 
