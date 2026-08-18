@@ -1,0 +1,9 @@
+{
+  "provider": "zhipu",
+  "apiKey": "",
+  "embedModel": "embedding-3",
+  "rerank": true,
+  "rerankModel": "bge-reranker-v2-m3",
+  "chunkSize": 500,
+  "embed_base": "https://emb.example.com/v1"
+}

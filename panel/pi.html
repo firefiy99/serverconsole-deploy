@@ -1,0 +1,292 @@
+<!doctype html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<title>Pi 编码助手</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,'PingFang SC','Microsoft YaHei',sans-serif;background:radial-gradient(1000px 500px at 20% -10%,#1c2b4a 0%,#0b1220 60%),#0b1220;background-attachment:fixed;color:#1a1c1e;height:100vh;display:flex;flex-direction:column;max-width:760px;margin:0 auto}
+header{display:flex;align-items:center;gap:8px;padding:10px 12px;background:#fff;border-bottom:1px solid #e6e9ee;position:sticky;top:0;z-index:10}
+header a{color:#2e7d32;text-decoration:none;font-size:14px;white-space:nowrap}
+header .tt{flex:1;font-size:16px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+header button{border:none;border-radius:14px;padding:6px 12px;font-size:12px;cursor:pointer;white-space:nowrap}
+#newBtn{background:#eef2f6;color:#37474f}
+#cfgBtn{background:#00695c;color:#fff}
+.banner{background:#fff4e5;color:#8a4b00;padding:8px 14px;font-size:13px;border-bottom:1px solid #ffe0b3}
+#chat{flex:1;overflow-y:auto;padding:14px 12px}
+.msg{display:flex;margin-bottom:12px}
+.msg .av{width:32px;height:32px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:15px}
+.msg.user{justify-content:flex-end}
+.msg.user .av{background:#2e7d32;color:#fff;order:2;margin-left:8px}
+.msg.ass .av{background:#3949AB;color:#fff;margin-right:8px}
+.bub{max-width:84%;padding:10px 12px;border-radius:14px;font-size:14px;line-height:1.65;word-break:break-word}
+.msg.user .bub{background:#2e7d32;color:#fff;border-top-right-radius:4px}
+.msg.ass .bub{background:#fff;border:1px solid #e6e9ee;border-top-left-radius:4px}
+.bub p{margin:0 0 8px}
+.bub p:last-child{margin-bottom:0}
+.bub h3,.bub h4,.bub h5{margin:10px 0 6px}
+.bub blockquote{border-left:3px solid #cbd5e1;color:#64748b;padding:2px 10px;margin:6px 0}
+.bub code.ic{background:radial-gradient(1000px 500px at 20% -10%,#1c2b4a 0%,#0b1220 60%),#0b1220;background-attachment:fixed;border-radius:4px;padding:1px 5px;font-size:12.5px;font-family:ui-monospace,Menlo,Consolas,monospace;color:#c7254e}
+.msg.user .bub code.ic{background:rgba(255,255,255,.18);color:#fff}
+.cb{background:#0f172a;border-radius:10px;margin:8px 0;overflow:hidden}
+.cbar{display:flex;justify-content:space-between;align-items:center;padding:5px 10px;background:#1e293b;color:#94a3b8;font-size:11px}
+.cbar button{background:#334155;color:#e2e8f0;border:none;border-radius:6px;padding:3px 10px;font-size:11px;cursor:pointer}
+.cb pre{padding:10px 12px;overflow-x:auto}
+.cb pre code{color:#e2e8f0;font-family:ui-monospace,Menlo,Consolas,monospace;font-size:12.5px;white-space:pre}
+.err{color:#c62828;background:#ffebee;border:1px solid #ffcdd2;border-radius:10px;padding:10px 12px;margin:8px 0;font-size:13px}
+.typing{color:#8a9099;font-size:13px;padding:10px 14px;font-style:italic}
+.cfg{background:#fff;border-bottom:1px solid #e6e9ee;padding:12px 14px;display:none}
+.cfg label{display:block;font-size:12px;color:#5a6068;margin:10px 0 4px}
+.cfg input,.cfg select,.cfg textarea{width:100%;padding:8px;border:1px solid #d5dae0;border-radius:8px;font-size:14px;background:#fff;font-family:inherit}
+.cfg .hint{font-size:12px;color:#8a9099;margin-top:4px}
+.cfg button.primary{width:100%;padding:10px;background:#00695c;color:#fff;border:none;border-radius:8px;font-size:15px;margin-top:14px;cursor:pointer}
+.inputbar{display:flex;gap:8px;padding:10px 12px;background:#fff;border-top:1px solid #e6e9ee;align-items:flex-end}
+.inputbar textarea{flex:1;resize:none;border:1px solid #d5dae0;border-radius:12px;padding:10px 12px;font-size:14px;max-height:140px;font-family:inherit;line-height:1.5}
+.inputbar textarea:focus{outline:none;border-color:#2e7d32}
+#sendBtn{background:#2e7d32;color:#fff;border:none;border-radius:12px;padding:10px 18px;font-size:14px;cursor:pointer;flex-shrink:0}
+#sendBtn:disabled{background:#a5d6a7;cursor:not-allowed}
+#stopBtn{display:none;background:#e53935;color:#fff;border:none;border-radius:12px;padding:10px 18px;font-size:14px;cursor:pointer;flex-shrink:0}
+/* deep theme overrides */
+body{color:#e2e8f0}
+header{background:rgba(13,20,36,.85);border-bottom:1px solid rgba(255,255,255,.08);backdrop-filter:blur(8px)}
+header a{color:#34d399}
+header .tt{color:#f1f5f9}
+header button{background:rgba(255,255,255,.1);color:#cbd5e1;border:1px solid rgba(255,255,255,.1)}
+#newBtn{background:#2e7d32 !important;color:#fff !important}
+#cfgBtn{background:#00695c !important;color:#fff !important}
+.card{background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.09);backdrop-filter:blur(6px)}
+.card h3{color:#f1f5f9}
+label{color:#94a3b8}
+input,textarea,select{background:rgba(15,23,42,.6);border:1px solid rgba(255,255,255,.15);color:#e2e8f0}
+input::placeholder,textarea::placeholder{color:#64748b}
+.hint{color:#7c8aa5}
+.item{color:#cbd5e1;border-bottom:1px solid rgba(255,255,255,.06)}
+.item:hover{background:rgba(255,255,255,.05)}
+.item .nm{color:#f1f5f9}
+.item .sb{color:#7c8aa5}
+.item .t{color:#64748b}
+.stat .c{background:rgba(255,255,255,.05) !important;border:1px solid rgba(255,255,255,.08)}
+.stat .c .n{color:#f1f5f9}
+.stat .c .l{color:#7c8aa5}
+.hist .h{background:rgba(255,255,255,.07) !important;color:#cbd5e1}
+.hist .h .c{color:#34d399}
+.banner{background:rgba(255,180,0,.12);color:#fbbf24;border-bottom:1px solid rgba(255,180,0,.25)}
+.msg.ass .bub{background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.1);color:#e2e8f0}
+.bub code.ic{background:rgba(15,23,42,.6) !important;color:#f472b6}
+.bub blockquote{color:#94a3b8;border-left-color:#334155}
+.typing{color:#7c8aa5}
+.res{background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.09)}
+.res .doc{color:#34d399}
+.res .tx{color:#cbd5e1}
+.res .sc{color:#64748b}
+.empty{color:#7c8aa5}
+.topbar .t{color:#f1f5f9}
+.row label{color:#94a3b8}</style>
+</head>
+<body>
+<header>
+<a href="/">← 返回</a>
+<div class="tt">💻 Pi 编码助手</div>
+<button id="cfgBtn">⚙ 设置</button>
+<button id="newBtn">新对话</button>
+</header>
+<div class="banner" id="banner" style="display:none"></div>
+<div class="cfg" id="cfgPanel">
+<label>模型服务商</label>
+<select id="c_provider"><option value="glm">智谱 GLM（open.bigmodel.cn）</option><option value="deepseek">DeepSeek（api.deepseek.com）</option><option value="custom">自定义（OpenAI 兼容）</option></select>
+<div id="c_base_wrap" style="display:none"><label>接口地址（OpenAI 兼容）</label><input id="c_base" placeholder="如 https://api.openai.com/v1"></div>
+<label>模型名（可点「获取模型」自动列出）</label>
+<div style="display:flex;gap:8px"><input id="c_model" list="dl_models" placeholder="如 glm-4.5 / deepseek-chat" style="flex:1"><button type="button" id="fetchBtn" style="flex-shrink:0;padding:8px 12px;border:none;border-radius:8px;background:#3949AB;color:#fff;font-size:13px;cursor:pointer">获取模型</button></div>
+<div id="modelList" style="margin-top:6px;max-height:160px;overflow-y:auto;border:1px solid #e6e9ee;border-radius:8px;padding:6px;display:none"></div>
+<datalist id="dl_models"></datalist>
+<label>API Key（留空表示保持不变）</label>
+<input id="c_key" type="password" placeholder="sk-...">
+<div class="hint" id="c_hint"></div>
+<label>系统提示词</label>
+<textarea id="c_prompt" rows="3"></textarea>
+<button class="primary" id="saveCfg">保存设置</button>
+</div>
+<div id="chat"></div>
+<div class="inputbar">
+<textarea id="inp" rows="1" placeholder="向 Pi 提问 · Enter 发送 · Shift+Enter 换行"></textarea>
+<button id="sendBtn">发送</button>
+<button id="stopBtn">停止</button>
+</div>
+<script>
+var state=[],streaming=false,ctrl,acc='',curNode,hadError=false;
+var cfg={provider:'glm',model:'',systemPrompt:'',has_key:false,key_hint:''};
+var MODELS={glm:['glm-4.5','glm-4.5-air','glm-4.6','glm-5.7'],deepseek:['deepseek-chat','deepseek-reasoner']};
+function $(id){return document.getElementById(id)}
+function esc(s){return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;')}
+function mdInline(s){
+  s=s.replace(/\*\*([^*]+)\*\*/g,'<b>$1</b>');
+  s=s.replace(/`([^`]+)`/g,'<code class="ic">$1</code>');
+  s=s.replace(/\[([^\]]+)\]\((https?:\/\/[^)\s]+)\)/g,'<a href="$2" target="_blank" rel="noopener">$1</a>');
+  return s;
+}
+function md(src){
+  var out='';var parts=src.split(/```/);
+  for(var i=0;i<parts.length;i++){
+    if(i%2===0){
+      var text=esc(parts[i]),lines=text.split('\n'),para=[];
+      for(var j=0;j<lines.length;j++){
+        var l=lines[j];
+        var m=l.match(/^(#{1,4})\s+(.*)$/);
+        if(m){out+='<h'+(m[1].length+2)+'>'+mdInline(m[2])+'</h'+(m[1].length+2)+'>';continue}
+        if(/^\s*[-*]\s+/.test(l)){out+='<div style="padding-left:6px">• '+mdInline(l.replace(/^\s*[-*]\s+/,''))+'</div>';continue}
+        if(/^\s*\d+\.\s+/.test(l)){out+='<div style="padding-left:6px">'+mdInline(l.replace(/^\s*\d+\.\s+/,''))+'</div>';continue}
+        if(/^\s*&gt;\s?/.test(l)){out+='<blockquote>'+mdInline(l.replace(/^\s*&gt;\s?/,''))+'</blockquote>';continue}
+        if(l.trim()==='')continue;
+        para.push(l);
+      }
+      if(para.length)out+='<p>'+mdInline(para.join('<br>'))+'</p>';
+    }else{
+      var ls=parts[i].split('\n');var lang=esc((ls[0]||'').trim());var code=esc(ls.slice(1).join('\n'));
+      out+='<div class="cb"><div class="cbar"><span>'+lang+'</span><button onclick="copyCode(this)">复制</button></div><pre><code>'+code+'</code></pre></div>';
+    }
+  }
+  return out;
+}
+function copyCode(btn){
+  var code=btn.parentNode.nextElementSibling.textContent;
+  if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(code).then(function(){btn.textContent='已复制';setTimeout(function(){btn.textContent='复制'},1200)})}
+  else{var ta=document.createElement('textarea');ta.value=code;document.body.appendChild(ta);ta.select();document.execCommand('copy');document.body.removeChild(ta);btn.textContent='已复制';setTimeout(function(){btn.textContent='复制'},1200)}
+}
+function toast(m){var t=$('toast');if(!t){t=document.createElement('div');t.id='toast';t.style.cssText='position:fixed;left:50%;bottom:40px;transform:translateX(-50%);background:rgba(0,0,0,.8);color:#fff;padding:8px 16px;border-radius:20px;font-size:13px;z-index:99;max-width:80%';document.body.appendChild(t)}t.textContent=m;t.style.display='block';clearTimeout(window.__tt);window.__tt=setTimeout(function(){t.style.display='none'},1800)}
+function api(path,opts){
+  opts=opts||{};
+  return fetch(path,opts).then(function(r){
+    if(r.status===401){location.href='/login';throw new Error('unauthorized')}
+    return r.json();
+  });
+}
+function loadCfg(){
+  api('/api/pi/config').then(function(d){
+    cfg=d;
+    $('c_provider').value=d.provider||'glm';
+    $('c_model').value=d.model||'';
+    $('c_prompt').value=d.systemPrompt||'';document.getElementById('c_base').value=d.base_url||'';toggleBase();
+    $('c_hint').textContent=d.has_key?('已配置 Key：'+d.key_hint+'（留空保持不变）'):'未配置 API Key';
+    var dl=$('dl_models');dl.innerHTML='';
+    (MODELS[d.provider]||[]).forEach(function(m){var o=document.createElement('option');o.value=m;dl.appendChild(o)});
+    var b=$('banner');
+    if(!d.has_key){b.style.display='block';b.innerHTML='⚠ 尚未配置模型 API Key，点击右上「⚙ 设置」填写后即可对话。'}else{b.style.display='none'}
+  }).catch(function(){});
+}
+function toggleBase(){var c=$('c_provider').value;document.getElementById('c_base_wrap').style.display=(c==='custom')?'block':'none'}
+$('c_provider').onchange=function(){toggleBase();var dl=$('dl_models');dl.innerHTML='';(MODELS[this.value]||[]).forEach(function(m){var o=document.createElement('option');o.value=m;dl.appendChild(o)})};
+$('fetchBtn').onclick=function(){var pv=document.getElementById('c_provider').value;var base=document.getElementById('c_base').value.trim();
+  if(pv==='glm')base='https://open.bigmodel.cn/api/paas/v4';
+  if(pv==='deepseek')base='https://api.deepseek.com/v1';
+  var key=document.getElementById('c_key').value.trim();
+  if(!base||!key){toast('请填写接口地址和 API Key');return}
+  var btn=document.getElementById('fetchBtn');btn.disabled=true;btn.textContent='获取中…';
+  fetch('/api/models/fetch',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({base_url:base,api_key:key})}).then(function(r){return r.json()}).then(function(d){
+    if(d.error){toast(d.error);return}
+    var ml=document.getElementById('modelList');ml.innerHTML='';ml.style.display='block';
+    (d.models||[]).forEach(function(m){var lab=document.createElement('label');lab.style.cssText='display:block;padding:5px 8px;border-radius:6px;cursor:pointer;font-size:13px';lab.textContent=m;
+      lab.onclick=function(){document.querySelectorAll('#modelList label').forEach(function(x){x.style.background=''});lab.style.background='#e8eaf6';document.getElementById('c_model').value=m};
+      ml.appendChild(lab)});
+    if(!(d.models||[]).length){ml.innerHTML='<div style="color:#8a9099;font-size:12px">未返回模型，请检查地址或手动填写模型名</div>'}
+  }).catch(function(e){toast('请求失败：'+e.message)}).finally(function(){btn.disabled=false;btn.textContent='获取模型'});
+};
+toggleBase();
+$('saveCfg').onclick=function(){
+  var d={provider:$('c_provider').value,model:$('c_model').value.trim(),systemPrompt:$('c_prompt').value.trim(),base_url:document.getElementById('c_base').value.trim()};
+  var k=$('c_key').value.trim();if(k)d.apiKey=k;
+  api('/api/pi/config',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(d)}).then(function(){toast('设置已保存');$('c_key').value='';loadCfg()}).catch(function(){toast('保存失败')});
+};
+$('cfgBtn').onclick=function(){var p=$('cfgPanel');p.style.display=p.style.display==='none'?'block':'none'};
+function addMsg(role,text){
+  var chat=$('chat');
+  var m=document.createElement('div');m.className='msg '+role;
+  var av=document.createElement('div');av.className='av';av.textContent=role==='user'?'🧑':'🤖';
+  var bub=document.createElement('div');bub.className='bub';
+  m.appendChild(av);m.appendChild(bub);
+  chat.appendChild(m);
+  if(role==='ass')bub.innerHTML=md(text);else bub.textContent=text;
+  chat.scrollTop=chat.scrollHeight;
+  return bub;
+}
+function addErr(text){
+  var chat=$('chat');
+  var d=document.createElement('div');d.className='err';d.textContent=text;
+  chat.appendChild(d);chat.scrollTop=chat.scrollHeight;
+}
+function renderAcc(){if(curNode)curNode.innerHTML=md(acc);$('chat').scrollTop=$('chat').scrollHeight}
+function send(){
+  if(streaming)return;
+  var v=$('inp').value.trim();
+  if(!v)return;
+  if(!cfg.has_key){toast('请先配置 API Key');$('cfgPanel').style.display='block';return}
+  state.push({role:'user',content:v});
+  addMsg('user',v);
+  $('inp').value='';
+  acc='';hadError=false;
+  var bub=addMsg('ass','');curNode=bub;
+  var t=document.createElement('div');t.className='typing';t.textContent='Pi 正在思考…';bub.appendChild(t);
+  streaming=true;$('sendBtn').disabled=true;$('stopBtn').style.display='inline-block';
+  ctrl=new AbortController();
+  fetch('/api/pi/chat',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({messages:state}),signal:ctrl.signal})
+  .then(function(r){
+    if(r.status===401){location.href='/login';throw new Error('unauthorized')}
+    if(!r.ok||!r.body){throw new Error('HTTP '+r.status)}
+    var reader=r.body.getReader();var dec=new TextDecoder();var buf='';var done=false;
+    function finish(){
+      if(streaming){
+        streaming=false;$('sendBtn').disabled=false;$('stopBtn').style.display='none';
+        var typing=bub.querySelector('.typing');if(typing)typing.remove();
+        if(acc){bub.innerHTML=md(acc);state.push({role:'assistant',content:acc});saveConv()}
+        else if(!hadError){bub.innerHTML='<span style="color:#8a9099">（无回复）</span>'}
+      }
+      $('chat').scrollTop=$('chat').scrollHeight;
+    }
+    function pump(){
+      return reader.read().then(function(res){
+        if(res.done){finish();return}
+        buf+=dec.decode(res.value,{stream:true});
+        var idx;
+        while((idx=buf.indexOf('\n\n'))>=0){
+          var chunk=buf.slice(0,idx);buf=buf.slice(idx+2);
+          chunk.split('\n').forEach(function(line){
+            if(line.indexOf('data:')!==0)return;
+            var payload=line.slice(5).trim();
+            if(payload==='[DONE]'){done=true;return}
+            try{var obj=JSON.parse(payload)}catch(e){return}
+            if(obj.error){if(!acc){bub.innerHTML=''}addErr(obj.error);hadError=true;done=true}
+            else if(obj.delta){acc+=obj.delta;renderAcc()}
+          });
+        }
+        if(done){finish();return}
+        return pump();
+      });
+    }
+    return pump();
+  })
+  .catch(function(e){
+    if(e.name==='AbortError'){finish()}
+    else{streaming=false;$('sendBtn').disabled=false;$('stopBtn').style.display='none';if(!acc&&!hadError){var typing=bub.querySelector('.typing');if(typing)typing.remove();addErr('请求失败：'+e.message)}}
+  });
+}
+$('stopBtn').onclick=function(){if(ctrl)ctrl.abort()};
+$('newBtn').onclick=function(){
+  if(streaming)return;
+  if(state.length&&!confirm('确定开始新对话？当前内容将被清空。'))return;
+  state=[];$('chat').innerHTML='';localStorage.removeItem('pi_conv');
+};
+var inp=$('inp');
+function autoGrow(){inp.style.height='auto';inp.style.height=Math.min(inp.scrollHeight,140)+'px'}
+inp.addEventListener('input',autoGrow);
+inp.addEventListener('keydown',function(e){if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();send()}});
+$('sendBtn').onclick=send;
+function saveConv(){try{localStorage.setItem('pi_conv',JSON.stringify(state))}catch(e){}}
+function restoreConv(){
+  try{var s=localStorage.getItem('pi_conv');if(s)state=JSON.parse(s)||[]}catch(e){state=[]}
+  state.forEach(function(m){if(m.content)addMsg(m.role==='user'?'user':'ass',m.content)});
+}
+loadCfg();
+restoreConv();
+</script>
+</body>
+</html>

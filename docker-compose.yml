@@ -1,0 +1,115 @@
+# ============================================================
+# ServerConsole 三端协同系统 - Docker Compose 全家桶
+# 一键部署：astrbot + napcat + gsuid_core + 控制台面板 + nginx + 语音中继
+# 配置方式：复制 .env.example 为 .env 并修改，然后 docker compose up -d
+# ============================================================
+
+services:
+  # ---------- 控制台面板（聚合监控 + Pi + 知识库 + 远程协助） ----------
+  agent-monitor:
+    build: ./panel
+    container_name: agent-monitor
+    network_mode: host
+    restart: unless-stopped
+    environment:
+      AGENT_KEY: ${AGENT_KEY}
+      PANEL_NAME: ${PANEL_NAME:-控制台}
+      PANEL_LOGO: ${PANEL_LOGO:-控}
+      PANEL_SUB: ${PANEL_SUB:-服务器控制台}
+    volumes:
+      - ./panel:/app
+      - /var/run/docker.sock:/var/run/docker.sock
+
+  # ---------- nginx 反向代理（8000 -> 面板，/ws/voice -> 语音中继） ----------
+  nginx-proxy:
+    image: nginx:alpine
+    container_name: nginx-proxy
+    network_mode: host
+    restart: unless-stopped
+    volumes:
+      - ./panel/nginx.conf:/etc/nginx/nginx.conf:ro
+
+  # ---------- 语音中继（WebSocket 回环，voice-relay 镜像本地构建） ----------
+  voice-relay:
+    build: ./voice-relay
+    container_name: voice-relay
+    network_mode: host
+    restart: unless-stopped
+    environment:
+      AGENT_KEY: ${AGENT_KEY}
+
+  # ---------- AstrBot 聊天机器人核心 ----------
+  astrbot:
+    image: soulter/astrbot:latest
+    container_name: astrbot
+    restart: unless-stopped
+    networks:
+      - appnet
+    ports:
+      - "6185:6185"    # WebUI
+      - "6199:6199"    # aiocqhttp 反向 WS（NapCat 连这里）
+      - "9200-9250:9200-9250"  # OneBot 正向上报端口
+    volumes:
+      - ./data/astrbot:/AstrBot/data
+
+  # ---------- NapCat QQ 协议端 ----------
+  napcat:
+    image: mlikiowa/napcat-docker:latest
+    container_name: napcat
+    restart: unless-stopped
+    networks:
+      - appnet
+    environment:
+      ACCOUNT: ${QQ_ACCOUNT}
+      TZ: Asia/Shanghai
+    ports:
+      - "6099:6099"    # NapCat WebUI
+    volumes:
+      - napcat-data:/app/napcat
+      - napcat-config:/app/config
+      - napcat-qq:/app/.config/QQ
+
+  # ---------- GsCore（游戏数据查询） ----------
+  gsuid_core:
+    image: gsuid-core:runtime
+    container_name: gsuid_core
+    restart: unless-stopped
+    networks:
+      - appnet
+    command: ["uv", "run", "--python", "/venv/bin/python", "core", "--host", "0.0.0.0"]
+    ports:
+      - "8765:8765"
+    volumes:
+      - ./data/gsuid_core:/gsuid_core
+      - gsuid-venv:/venv
+
+  # ---------- DeepSeek Harness（DSH 编程助手，可选） ----------
+  dsh:
+    image: 1panel/deepseek-harness:0.1.0-rc.6
+    container_name: dsh
+    restart: unless-stopped
+    environment:
+      DSH_AUTH_USERNAME: ${DSH_USER:-admin}
+      DSH_AUTH_PASSWORD: ${DSH_PASSWORD}
+      HTTPS_ACCESS_HOST: ${SERVER_IP}
+      DSH_TELEMETRY_DISABLED: "1"
+    ports:
+      - "8443:8443"
+    volumes:
+      - ./data/dsh:/data
+      - ./data/dsh-workspace:/workspace
+    read_only: true
+    tmpfs:
+      - /tmp
+    security_opt:
+      - no-new-privileges
+
+networks:
+  appnet:
+    driver: bridge
+
+volumes:
+  napcat-data:
+  napcat-config:
+  napcat-qq:
+  gsuid-venv:

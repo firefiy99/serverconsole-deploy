@@ -1,0 +1,164 @@
+<!doctype html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<title>安全</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,'PingFang SC','Microsoft YaHei',sans-serif;background:radial-gradient(1000px 500px at 20% -10%,#1c2b4a 0%,#0b1220 60%),#0b1220;background-attachment:fixed;color:#1a1c1e;max-width:760px;margin:0 auto;padding-bottom:20px}
+header{display:flex;align-items:center;gap:8px;padding:10px 12px;background:#fff;border-bottom:1px solid #e6e9ee;position:sticky;top:0;z-index:10}
+header a{color:#2e7d32;text-decoration:none;font-size:14px;white-space:nowrap}
+header .tt{flex:1;font-size:16px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+header button{background:#eef2f6;color:#37474f;border:none;border-radius:14px;padding:6px 12px;font-size:12px;cursor:pointer}
+.card{background:#fff;border-radius:14px;padding:14px;margin:12px;border:1px solid #e6e9ee}
+.card h3{font-size:15px;margin-bottom:8px;display:flex;align-items:center;gap:8px}
+.stat{display:flex;gap:8px;margin:8px 0}
+.stat .c{flex:1;background:radial-gradient(1000px 500px at 20% -10%,#1c2b4a 0%,#0b1220 60%),#0b1220;background-attachment:fixed;border-radius:10px;padding:10px;text-align:center}
+.stat .c .n{font-size:22px;font-weight:700;color:#1a1c1e}
+.stat .c .l{font-size:11px;color:#8a9099;margin-top:2px}
+.stat .c.green .n{color:#2e7d32}
+.stat .c.red .n{color:#e53935}
+.item{display:flex;align-items:center;gap:8px;padding:8px 0;border-bottom:1px solid #f0f2f5;font-size:13px}
+.item:last-child{border-bottom:none}
+.item .ip{font-family:monospace;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis}
+.item .t{color:#8a9099;font-size:11px;white-space:nowrap}
+.item .btn{background:#e53935;color:#fff;border:none;border-radius:6px;padding:4px 10px;font-size:11px;cursor:pointer}
+.item .btn.ok{background:#2e7d32}
+.badge{display:inline-block;padding:2px 8px;border-radius:10px;font-size:11px;color:#fff;white-space:nowrap}
+.badge.fail{background:#e53935}
+.badge.ok{background:#2e7d32}
+.badge.ban{background:#37474f}
+.badge.block{background:#f57c00}
+.hint{font-size:12px;color:#8a9099;margin:6px 0}
+.code{background:#0f172a;color:#e2e8f0;padding:10px 12px;border-radius:8px;font-size:12px;font-family:monospace;white-space:pre-wrap;word-break:break-all;margin:6px 0}
+.btn.danger{width:100%;padding:10px;background:#e53935;color:#fff;border:none;border-radius:8px;font-size:14px;cursor:pointer;margin-top:8px}
+.empty{color:#8a9099;font-size:13px;text-align:center;padding:20px 0}
+#toast{display:none;position:fixed;left:50%;bottom:40px;transform:translateX(-50%);background:rgba(0,0,0,.8);color:#fff;padding:8px 16px;border-radius:20px;font-size:13px;z-index:99;max-width:80%}
+/* deep theme overrides */
+body{color:#e2e8f0}
+header{background:rgba(13,20,36,.85);border-bottom:1px solid rgba(255,255,255,.08);backdrop-filter:blur(8px)}
+header a{color:#34d399}
+header .tt{color:#f1f5f9}
+header button{background:rgba(255,255,255,.1);color:#cbd5e1;border:1px solid rgba(255,255,255,.1)}
+#newBtn{background:#2e7d32 !important;color:#fff !important}
+#cfgBtn{background:#00695c !important;color:#fff !important}
+.card{background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.09);backdrop-filter:blur(6px)}
+.card h3{color:#f1f5f9}
+label{color:#94a3b8}
+input,textarea,select{background:rgba(15,23,42,.6);border:1px solid rgba(255,255,255,.15);color:#e2e8f0}
+input::placeholder,textarea::placeholder{color:#64748b}
+.hint{color:#7c8aa5}
+.item{color:#cbd5e1;border-bottom:1px solid rgba(255,255,255,.06)}
+.item:hover{background:rgba(255,255,255,.05)}
+.item .nm{color:#f1f5f9}
+.item .sb{color:#7c8aa5}
+.item .t{color:#64748b}
+.stat .c{background:rgba(255,255,255,.05) !important;border:1px solid rgba(255,255,255,.08)}
+.stat .c .n{color:#f1f5f9}
+.stat .c .l{color:#7c8aa5}
+.hist .h{background:rgba(255,255,255,.07) !important;color:#cbd5e1}
+.hist .h .c{color:#34d399}
+.banner{background:rgba(255,180,0,.12);color:#fbbf24;border-bottom:1px solid rgba(255,180,0,.25)}
+.msg.ass .bub{background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.1);color:#e2e8f0}
+.bub code.ic{background:rgba(15,23,42,.6) !important;color:#f472b6}
+.bub blockquote{color:#94a3b8;border-left-color:#334155}
+.typing{color:#7c8aa5}
+.res{background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.09)}
+.res .doc{color:#34d399}
+.res .tx{color:#cbd5e1}
+.res .sc{color:#64748b}
+.empty{color:#7c8aa5}
+.topbar .t{color:#f1f5f9}
+.row label{color:#94a3b8}</style>
+</head>
+<body>
+<header>
+<a href="/">← 返回</a>
+<div class="tt">🛡️ 安全</div>
+<button id="newBtn">刷新</button>
+</header>
+<div class="card">
+<h3>⚙ 安全配置</h3>
+<div class="stat">
+<div class="c"><div class="n" id="s_key">--</div><div class="l">统一密钥</div></div>
+<div class="c"><div class="n" id="s_limit">--</div><div class="l">登录限流</div></div>
+<div class="c"><div class="n" id="s_ban">--</div><div class="l">封禁时长</div></div>
+<div class="c green"><div class="n" id="s_fail">--</div><div class="l">近期失败</div></div>
+</div>
+</div>
+
+<div class="row" style="display:flex;gap:8px;margin-top:12px">
+<div style="flex:1"><label style="display:block;font-size:12px;color:#5a6068;margin-bottom:4px">登录限流次数</label><input id="cfg_max" type="number" min="3" max="100" style="width:100%;padding:8px;border:1px solid #d5dae0;border-radius:8px;font-size:14px"></div>
+<div style="flex:1"><label style="display:block;font-size:12px;color:#5a6068;margin-bottom:4px">时间窗口(秒)</label><input id="cfg_window" type="number" min="5" max="3600" style="width:100%;padding:8px;border:1px solid #d5dae0;border-radius:8px;font-size:14px"></div>
+<div style="flex:1"><label style="display:block;font-size:12px;color:#5a6068;margin-bottom:4px">封禁时长(分钟)</label><input id="cfg_ban" type="number" min="1" max="1440" style="width:100%;padding:8px;border:1px solid #d5dae0;border-radius:8px;font-size:14px"></div>
+</div>
+<button class="btn ok" id="saveCfgBtn" style="width:100%;margin-top:10px;padding:9px;border:none;border-radius:8px;font-size:14px;cursor:pointer;background:#2e7d32;color:#fff">保存安全配置</button>
+</div>
+<div class="card">
+<h3>🔒 应用层封禁<span class="hint" id="ban_count" style="margin-left:auto;font-size:12px"></span></h3>
+<div id="ban_list"><div class="empty">加载中…</div></div>
+<div class="hint">应用层封禁（banned.json）：面板返回 403，到期自动解封。系统级封禁（iptables DROP）由 agent-ban 守护进程管理，需在远程协助执行解封。</div>
+</div>
+<div class="card">
+<h3>📋 最近安全事件</h3>
+<div id="events"><div class="empty">加载中…</div></div>
+</div>
+<div class="card">
+<h3>⚠ 危险操作</h3>
+<button class="btn danger" id="resetBtn">清空所有应用层封禁</button>
+<div class="hint" style="margin-top:6px">清空后 agent-ban 守护进程的 iptables 封禁不会自动解除，需在远程协助手动执行解封。</div>
+</div>
+<div class="toast" id="toast"></div>
+<script>
+function $(id){return document.getElementById(id)}
+function toast(m){var t=$('toast');t.textContent=m;t.style.display='block';clearTimeout(window.__tt);window.__tt=setTimeout(function(){t.style.display='none'},3000)}
+function load(){
+fetch('/api/security/status').then(function(r){if(r.status===401){location.href='/login';return}return r.json()}).then(function(d){
+  if(!d)return;
+  $('s_key').textContent=d.has_key?'已配置':'未配置';
+  $('s_key').style.color=d.has_key?'#2e7d32':'#e53935';
+  $('s_limit').textContent=d.login_limit+'次/'+d.login_window+'s';
+  $('s_ban').textContent=Math.round(d.ban_seconds/60)+'分钟';
+  $('s_fail').textContent=d.login_fail_24h;
+  $('cfg_max').value=d.login_limit;
+  $('cfg_window').value=d.login_window;
+  $('cfg_ban').value=Math.round(d.ban_seconds/60);
+  var bl=$('ban_list');bl.innerHTML='';
+  var bans=d.bans||[];
+  $('ban_count').textContent='('+bans.length+' 个)';
+  if(!bans.length){bl.innerHTML='<div class="empty">暂无封禁</div>'}else{
+  bans.forEach(function(b){
+    var it=document.createElement('div');it.className='item';
+    it.innerHTML='<span class="ip">'+b.ip+'</span><span class="t">剩余 '+b.remaining+'s</span>';
+    var ub=document.createElement('button');ub.className='btn';ub.textContent='解封';
+    ub.onclick=function(){
+      fetch('/api/security/unban',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({ip:b.ip})}).then(function(r){return r.json()}).then(function(d){
+        if(d.error){toast(d.error)}else{toast(d.message);load()}
+      });
+    };
+    it.appendChild(ub);bl.appendChild(it)
+  });}
+  var ev=$('events');ev.innerHTML='';
+  var evs=d.events||[];
+  if(!evs.length){ev.innerHTML='<div class="empty">暂无事件</div>'}else{
+  evs.reverse().forEach(function(e){
+    var it=document.createElement('div');it.className='item';
+    var ic='badge ';
+    if(e.type==='login_fail')ic+='fail';else if(e.type==='login_ok')ic+='ok';else if(e.type==='banned')ic+='ban';else ic+='block';
+    var label=e.type==='login_fail'?'登录失败':(e.type==='login_ok'?'登录成功':(e.type==='banned'?'封禁':(e.type==='blocked'?'拦截':e.type)));
+    it.innerHTML='<span class="t">'+e.time.slice(11,16)+'</span><span class="ip">'+e.ip+'</span><span class="'+ic+'">'+label+'</span>';
+    ev.appendChild(it)
+  });}
+}).catch(function(){toast('加载失败')})
+}
+$('saveCfgBtn').onclick=function(){
+  var cfg={login_max:parseInt($('cfg_max').value||'10',10),login_window:parseInt($('cfg_window').value||'30',10),ban_seconds:parseInt($('cfg_ban').value||'30',10)*60};
+  fetch('/api/security/config',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(cfg)}).then(function(r){return r.json()}).then(function(d){if(d.error){toast(d.error)}else{toast('安全配置已保存，即时生效');load()}});
+};
+$('newBtn').onclick=load;
+$('resetBtn').onclick=function(){if(!confirm('确定清空所有应用层封禁？'))return;fetch('/api/security/reset',{method:'POST'}).then(function(r){return r.json()}).then(function(d){toast(d.message);load()})};
+load();
+</script>
+</body>
+</html>

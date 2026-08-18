@@ -1,0 +1,169 @@
+<!doctype html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<title>共享知识库</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,'PingFang SC','Microsoft YaHei',sans-serif;background:radial-gradient(1000px 500px at 20% -10%,#1c2b4a 0%,#0b1220 60%),#0b1220;background-attachment:fixed;color:#1a1c1e;max-width:760px;margin:0 auto;padding-bottom:20px}
+header{display:flex;align-items:center;gap:8px;padding:10px 12px;background:#fff;border-bottom:1px solid #e6e9ee;position:sticky;top:0;z-index:10}
+header a{color:#2e7d32;text-decoration:none;font-size:14px;white-space:nowrap}
+header .tt{flex:1;font-size:16px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+header button{border:none;border-radius:14px;padding:6px 12px;font-size:12px;cursor:pointer;white-space:nowrap}
+#cfgBtn{background:#00695c;color:#fff}
+#newBtn{background:#eef2f6;color:#37474f}
+.banner{background:#fff4e5;color:#8a4b00;padding:8px 14px;font-size:13px;border-bottom:1px solid #ffe0b3}
+.cfg{background:#fff;border-bottom:1px solid #e6e9ee;padding:12px 14px;display:none}
+.cfg label{display:block;font-size:12px;color:#5a6068;margin:10px 0 4px}
+.cfg input,.cfg select,.cfg textarea{width:100%;padding:8px;border:1px solid #d5dae0;border-radius:8px;font-size:14px;background:#fff;font-family:inherit}
+.cfg .hint{font-size:12px;color:#8a9099;margin-top:4px}
+.cfg button.primary{width:100%;padding:10px;background:#00695c;color:#fff;border:none;border-radius:8px;font-size:15px;margin-top:14px;cursor:pointer}
+.cfg .row{display:flex;gap:8px;align-items:center}
+.cfg .row>div{flex:1}
+.card{background:#fff;border-radius:14px;padding:14px;margin:12px;border:1px solid #e6e9ee}
+.card h3{font-size:15px;margin-bottom:8px}
+label{display:block;font-size:12px;color:#5a6068;margin:10px 0 4px}
+input,textarea,select{width:100%;padding:8px;border:1px solid #d5dae0;border-radius:8px;font-size:14px;background:#fff;font-family:inherit}
+textarea{resize:vertical;min-height:80px}
+button.primary{width:100%;padding:10px;background:#00695c;color:#fff;border:none;border-radius:8px;font-size:15px;margin-top:12px;cursor:pointer}
+button.small{border:none;border-radius:6px;padding:5px 10px;font-size:12px;color:#fff;cursor:pointer}
+.del{background:#e53935}
+.add{background:#2e7d32;color:#fff;border:none;border-radius:8px;padding:9px 16px;font-size:14px;cursor:pointer;margin-top:10px;width:100%}
+.item{display:flex;align-items:center;gap:8px;padding:10px 0;border-bottom:1px solid #f0f2f5}
+.item:last-child{border-bottom:none}
+.item .mid{flex:1;min-width:0}
+.item .nm{font-size:14px;font-weight:600}
+.item .sub{font-size:12px;color:#8a9099}
+.hint{font-size:12px;color:#8a9099;margin-top:4px}
+.searchbar{display:flex;gap:8px;align-items:center}
+.searchbar input{flex:1}
+.searchbar button{background:#2e7d32;color:#fff;border:none;border-radius:12px;padding:9px 16px;font-size:14px;cursor:pointer;flex-shrink:0}
+.res{background:#fff;border:1px solid #e6e9ee;border-radius:12px;padding:12px;margin:10px 0}
+.res .doc{font-size:12px;color:#00695c;font-weight:600;margin-bottom:4px}
+.res .sc{font-size:11px;color:#8a9099}
+.res .tx{font-size:13px;color:#37474f;white-space:pre-wrap;word-break:break-word;margin-top:6px;line-height:1.6}
+.empty{color:#8a9099;font-size:13px;text-align:center;padding:20px 0}
+.toast{display:none;position:fixed;left:50%;bottom:40px;transform:translateX(-50%);background:rgba(0,0,0,.8);color:#fff;padding:8px 16px;border-radius:20px;font-size:13px;z-index:99;max-width:80%}
+/* deep theme overrides */
+body{color:#e2e8f0}
+header{background:rgba(13,20,36,.85);border-bottom:1px solid rgba(255,255,255,.08);backdrop-filter:blur(8px)}
+header a{color:#34d399}
+header .tt{color:#f1f5f9}
+header button{background:rgba(255,255,255,.1);color:#cbd5e1;border:1px solid rgba(255,255,255,.1)}
+#newBtn{background:#2e7d32 !important;color:#fff !important}
+#cfgBtn{background:#00695c !important;color:#fff !important}
+.card{background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.09);backdrop-filter:blur(6px)}
+.card h3{color:#f1f5f9}
+label{color:#94a3b8}
+input,textarea,select{background:rgba(15,23,42,.6);border:1px solid rgba(255,255,255,.15);color:#e2e8f0}
+input::placeholder,textarea::placeholder{color:#64748b}
+.hint{color:#7c8aa5}
+.item{color:#cbd5e1;border-bottom:1px solid rgba(255,255,255,.06)}
+.item:hover{background:rgba(255,255,255,.05)}
+.item .nm{color:#f1f5f9}
+.item .sb{color:#7c8aa5}
+.item .t{color:#64748b}
+.stat .c{background:rgba(255,255,255,.05) !important;border:1px solid rgba(255,255,255,.08)}
+.stat .c .n{color:#f1f5f9}
+.stat .c .l{color:#7c8aa5}
+.hist .h{background:rgba(255,255,255,.07) !important;color:#cbd5e1}
+.hist .h .c{color:#34d399}
+.banner{background:rgba(255,180,0,.12);color:#fbbf24;border-bottom:1px solid rgba(255,180,0,.25)}
+.msg.ass .bub{background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.1);color:#e2e8f0}
+.bub code.ic{background:rgba(15,23,42,.6) !important;color:#f472b6}
+.bub blockquote{color:#94a3b8;border-left-color:#334155}
+.typing{color:#7c8aa5}
+.res{background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.09)}
+.res .doc{color:#34d399}
+.res .tx{color:#cbd5e1}
+.res .sc{color:#64748b}
+.empty{color:#7c8aa5}
+.topbar .t{color:#f1f5f9}
+.row label{color:#94a3b8}</style>
+</head>
+<body>
+<header>
+<a href="/">← 返回</a>
+<div class="tt">📚 共享知识库</div>
+<button id="cfgBtn">⚙ 设置</button>
+<button id="newBtn">刷新</button>
+</header>
+<div class="banner" id="banner" style="display:none"></div>
+<div class="cfg" id="cfgPanel">
+<label>向量服务商</label>
+<select id="c_provider"><option value="zhipu">智谱 GLM（open.bigmodel.cn）</option><option value="dashscope">阿里百炼（dashscope）</option><option value="siliconflow">硅基流动（siliconflow）</option><option value="custom">自定义（OpenAI 兼容）</option></select><div id="c_base_wrap" style="display:none"><label>接口地址（OpenAI 兼容 Embedding）</label><input id="c_base" placeholder="如 https://api.openai.com/v1"></div>
+<label>Embedding 模型（可点「获取模型」自动列出）</label>
+<div style="display:flex;gap:8px"><input id="c_embed" list="dl_emb" placeholder="如 embedding-3 / text-embedding-v3 / BAAI/bge-m3" style="flex:1"><button type="button" id="fetchBtn" style="flex-shrink:0;padding:8px 12px;border:none;border-radius:8px;background:#3949AB;color:#fff;font-size:13px;cursor:pointer">获取模型</button></div>
+<div id="modelList" style="margin-top:6px;max-height:160px;overflow-y:auto;border:1px solid #e6e9ee;border-radius:8px;padding:6px;display:none"></div>
+<datalist id="dl_emb"></datalist>
+<label>API Key（留空表示保持不变）</label>
+<input id="c_key" type="password" placeholder="sk-...">
+<div class="hint" id="c_hint"></div>
+<div class="row">
+<div><label style="display:flex;align-items:center;gap:8px;font-size:14px"><input type="checkbox" id="c_rerank" style="width:auto;margin:0"> 启用精排</label></div>
+<div><label>Rerank 模型</label><input id="c_rerank_model" placeholder="如 bge-reranker-v2-m3"></div>
+</div>
+<label>切块大小（字）</label><input id="c_chunk" type="number" value="500">
+<button class="primary" id="saveCfg">保存设置</button>
+</div>
+<div class="card">
+<h3>添加文档</h3>
+<label>文档名称（可选）</label><input id="docName" placeholder="留空自动命名">
+<label>内容（支持长文本，自动切块）</label><textarea id="docText" placeholder="粘贴文档内容…"></textarea>
+<button class="add" id="addBtn">＋ 添加文档并向量化</button>
+</div>
+<div class="card">
+<h3>文档列表</h3>
+<div id="docList"><div class="empty">加载中…</div></div>
+</div>
+<div class="card">
+<h3>检索</h3>
+<div class="searchbar">
+<input id="q" placeholder="输入问题或关键词…">
+<select id="topk" style="width:70px;flex-shrink:0"><option>3</option><option selected>5</option><option>10</option></select>
+<button id="searchBtn">搜索</button>
+</div>
+<div id="results"></div>
+</div>
+<div class="toast" id="toast"></div>
+<script>
+var cfg={provider:'zhipu',embedModel:'',rerank:true,rerankModel:'',chunkSize:500,has_key:false,key_hint:''};
+var EMB={zhipu:['embedding-3'],dashscope:['text-embedding-v3'],siliconflow:['BAAI/bge-m3']};
+var RER={zhipu:['bge-reranker-v2-m3'],dashscope:['gte-rerank'],siliconflow:['BAAI/bge-reranker-v2-m3']};
+function $(id){return document.getElementById(id)}
+function toast(m){var t=$('toast');t.textContent=m;t.style.display='block';clearTimeout(window.__tt);window.__tt=setTimeout(function(){t.style.display='none'},2000)}
+function api(path,opts){opts=opts||{};return fetch(path,opts).then(function(r){if(r.status===401){location.href='/login';throw new Error('unauthorized')}return r.json()})}
+function fillModels(){var dl=$('dl_emb');dl.innerHTML='';var ms=EMB[$('c_provider').value]||[];ms.forEach(function(m){var o=document.createElement('option');o.value=m;dl.appendChild(o)});var rl=$('dl_rer');if(rl){rl.innerHTML='';(RER[$('c_provider').value]||[]).forEach(function(m){var o=document.createElement('option');o.value=m;rl.appendChild(o)})}}
+function loadCfg(){api('/api/kb/config').then(function(d){cfg=d;$('c_provider').value=d.provider||'zhipu';$('c_embed').value=d.embedModel||'';$('c_rerank').checked=!!d.rerank;$('c_rerank_model').value=d.rerankModel||'';$('c_chunk').value=d.chunkSize||500;$('c_hint').textContent=d.has_key?('已配置 Key：'+d.key_hint):'未配置 API Key';document.getElementById('c_base').value=d.embed_base||'';toggleBase();fillModels();var b=$('banner');if(!d.has_key){b.style.display='block';b.innerHTML='⚠ 尚未配置向量 API Key：右上「⚙ 设置」填写后才能添加文档和检索。'}else{b.style.display='none'}}).catch(function(){})}
+function toggleBase(){document.getElementById('c_base_wrap').style.display=(document.getElementById('c_provider').value==='custom')?'block':'none'}
+$('c_provider').onchange=function(){fillModels();toggleBase()};
+$('fetchBtn').onclick=function(){var pv=document.getElementById('c_provider').value;var base=document.getElementById('c_base').value.trim();
+  if(pv==='zhipu')base='https://open.bigmodel.cn/api/paas/v4';
+  if(pv==='dashscope')base='https://dashscope.aliyuncs.com/compatible-mode/v1';
+  if(pv==='siliconflow')base='https://api.siliconflow.cn/v1';
+  var key=document.getElementById('c_key').value.trim();
+  if(!base||!key){toast('请填写接口地址和 API Key');return}
+  var btn=document.getElementById('fetchBtn');btn.disabled=true;btn.textContent='获取中…';
+  fetch('/api/models/fetch',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({base_url:base,api_key:key})}).then(function(r){return r.json()}).then(function(d){
+    if(d.error){toast(d.error);return}
+    var ml=document.getElementById('modelList');ml.innerHTML='';ml.style.display='block';
+    (d.models||[]).forEach(function(m){var lab=document.createElement('label');lab.style.cssText='display:block;padding:5px 8px;border-radius:6px;cursor:pointer;font-size:13px';lab.textContent=m;
+      lab.onclick=function(){document.querySelectorAll('#modelList label').forEach(function(x){x.style.background=''});lab.style.background='#e8eaf6';document.getElementById('c_embed').value=m};
+      ml.appendChild(lab)});
+    if(!(d.models||[]).length){ml.innerHTML='<div style="color:#8a9099;font-size:12px">未返回模型，请检查地址或手动填写模型名</div>'}
+  }).catch(function(e){toast('请求失败：'+e.message)}).finally(function(){btn.disabled=false;btn.textContent='获取模型'});
+};
+toggleBase();
+$('saveCfg').onclick=function(){var d={provider:$('c_provider').value,embedModel:$('c_embed').value.trim(),rerank:$('c_rerank').checked,rerankModel:$('c_rerank_model').value.trim(),chunkSize:parseInt($('c_chunk').value||'500',10),embed_base:document.getElementById('c_base').value.trim()};var k=$('c_key').value.trim();if(k)d.apiKey=k;api('/api/kb/config',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(d)}).then(function(){toast('设置已保存');$('c_key').value='';loadCfg()}).catch(function(){toast('保存失败')})};
+$('cfgBtn').onclick=function(){var p=$('cfgPanel');p.style.display=p.style.display==='none'?'block':'none'};
+function loadDocs(){api('/api/kb/docs').then(function(d){var l=$('docList');l.innerHTML='';var docs=d.docs||[];if(!docs.length){l.innerHTML='<div class="empty">暂无文档</div>';return}docs.forEach(function(doc){var it=document.createElement('div');it.className='item';var mid=document.createElement('div');mid.className='mid';mid.innerHTML='<div class="nm">'+doc.name+'</div><div class="sub">'+doc.chunks+' 块 · '+new Date(doc.created*1000).toLocaleString()+'</div>';var del=document.createElement('button');del.className='small del';del.textContent='删除';del.onclick=function(){if(!confirm('删除「'+doc.name+'」？'))return;api('/api/kb/docs/'+doc.id,{method:'DELETE'}).then(function(){toast('已删除');loadDocs()})};it.appendChild(mid);it.appendChild(del);l.appendChild(it)})}).catch(function(){})}
+$('newBtn').onclick=function(){loadDocs();loadCfg()};
+$('addBtn').onclick=function(){var text=$('docText').value.trim();if(!text){toast('请先粘贴内容');return}if(!cfg.has_key){toast('请先配置 API Key');$('cfgPanel').style.display='block';return}var btn=$('addBtn');btn.disabled=true;btn.textContent='向量化中…';api('/api/kb/docs',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({name:$('docName').value.trim(),text:text})}).then(function(d){if(d.error){toast(d.error);return}toast('已添加：'+d.name+'（'+d.chunks+' 块）');$('docText').value='';$('docName').value='';loadDocs()}).catch(function(e){toast('失败：'+e.message)}).finally(function(){btn.disabled=false;btn.textContent='＋ 添加文档并向量化'})};
+$('searchBtn').onclick=function(){var q=$('q').value.trim();if(!q){toast('请输入查询');return}if(!cfg.has_key){toast('请先配置 API Key');$('cfgPanel').style.display='block';return}var btn=$('searchBtn');btn.disabled=true;btn.textContent='检索中…';var res=$('results');res.innerHTML='<div class="empty">检索中…</div>';api('/api/kb/search',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({query:q,top_k:parseInt($('topk').value||'5',10)})}).then(function(d){if(d.error){res.innerHTML='<div class="empty" style="color:#c62828">'+d.error+'</div>';return}var rs=d.results||[];res.innerHTML='';if(!rs.length){res.innerHTML='<div class="empty">没有找到相关内容</div>';return}rs.forEach(function(h){var div=document.createElement('div');div.className='res';div.innerHTML='<div class="doc">'+h.doc+' <span class="sc">相关度 '+h.score+'</span></div>';var tx=document.createElement('div');tx.className='tx';tx.textContent=h.text;div.appendChild(tx);res.appendChild(div)})}).catch(function(e){res.innerHTML='<div class="empty" style="color:#c62828">失败：'+e.message+'</div>'}).finally(function(){btn.disabled=false;btn.textContent='搜索'})};
+$('q').addEventListener('keydown',function(e){if(e.key==='Enter'){$('searchBtn').click()}});
+loadCfg();
+loadDocs();
+</script>
+</body>
+</html>

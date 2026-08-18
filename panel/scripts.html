@@ -1,0 +1,178 @@
+<!doctype html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<title>运维脚本</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,'PingFang SC','Microsoft YaHei',sans-serif;background:radial-gradient(1000px 500px at 20% -10%,#1c2b4a 0%,#0b1220 60%),#0b1220;background-attachment:fixed;color:#1a1c1e;max-width:820px;margin:0 auto;padding-bottom:20px}
+header{display:flex;align-items:center;gap:8px;padding:10px 12px;background:#fff;border-bottom:1px solid #e6e9ee;position:sticky;top:0;z-index:10}
+header a{color:#2e7d32;text-decoration:none;font-size:14px;white-space:nowrap}
+header .tt{flex:1;font-size:16px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+header button{background:#eef2f6;color:#37474f;border:none;border-radius:14px;padding:6px 12px;font-size:12px;cursor:pointer}
+#newBtn{background:#2e7d32;color:#fff}
+.card{background:#fff;border-radius:14px;padding:14px;margin:12px;border:1px solid #e6e9ee}
+.card h3{font-size:15px;margin-bottom:8px}
+label{display:block;font-size:12px;color:#5a6068;margin:10px 0 4px}
+input,textarea{width:100%;padding:8px;border:1px solid #d5dae0;border-radius:8px;font-size:14px;background:#fff;font-family:inherit}
+textarea{resize:vertical;min-height:120px;font-family:ui-monospace,Menlo,Consolas,monospace;font-size:13px;line-height:1.5}
+.item{display:flex;align-items:center;gap:8px;padding:8px 0;border-bottom:1px solid #f0f2f5;cursor:pointer}
+.item:hover{background:#f8fafc}
+.item:last-child{border-bottom:none}
+.item .mid{flex:1;min-width:0}
+.item .nm{font-size:14px;font-weight:600}
+.item .sb{font-size:12px;color:#8a9099;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.item .del{background:#e53935;color:#fff;border:none;border-radius:6px;padding:4px 10px;font-size:11px;cursor:pointer}
+.rowbtns{display:flex;gap:8px;margin-top:12px}
+.rowbtns button{flex:1;padding:10px;border:none;border-radius:8px;font-size:14px;cursor:pointer;color:#fff}
+#saveBtn{background:#00695c}
+#runBtn{background:#2e7d32}
+#runBtn:disabled{background:#a5d6a7;cursor:not-allowed}
+.runbar{display:flex;gap:8px;margin-top:10px;align-items:center}
+.runbar select{background:#fff;border:1px solid #d5dae0;border-radius:8px;padding:8px;font-size:13px}
+.out{background:#0f172a;color:#e2e8f0;border-radius:8px;padding:12px;font-size:12.5px;font-family:monospace;white-space:pre-wrap;word-break:break-all;margin-top:8px;max-height:320px;overflow-y:auto}
+.out .err{color:#fca5a5}
+.out .meta{color:#64748b;font-size:11px;margin-bottom:4px}
+.empty{color:#8a9099;font-size:13px;text-align:center;padding:20px 0}
+.hist{display:flex;gap:8px;flex-wrap:wrap}
+.hist .h{background:radial-gradient(1000px 500px at 20% -10%,#1c2b4a 0%,#0b1220 60%),#0b1220;background-attachment:fixed;border-radius:8px;padding:6px 10px;font-size:12px;color:#37474f}
+.hist .h .c{color:#2e7d32}
+.toast{display:none;position:fixed;left:50%;bottom:40px;transform:translateX(-50%);background:rgba(0,0,0,.8);color:#fff;padding:8px 16px;border-radius:20px;font-size:13px;z-index:99;max-width:80%}
+/* deep theme overrides */
+body{color:#e2e8f0}
+header{background:rgba(13,20,36,.85);border-bottom:1px solid rgba(255,255,255,.08);backdrop-filter:blur(8px)}
+header a{color:#34d399}
+header .tt{color:#f1f5f9}
+header button{background:rgba(255,255,255,.1);color:#cbd5e1;border:1px solid rgba(255,255,255,.1)}
+#newBtn{background:#2e7d32 !important;color:#fff !important}
+#cfgBtn{background:#00695c !important;color:#fff !important}
+.card{background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.09);backdrop-filter:blur(6px)}
+.card h3{color:#f1f5f9}
+label{color:#94a3b8}
+input,textarea,select{background:rgba(15,23,42,.6);border:1px solid rgba(255,255,255,.15);color:#e2e8f0}
+input::placeholder,textarea::placeholder{color:#64748b}
+.hint{color:#7c8aa5}
+.item{color:#cbd5e1;border-bottom:1px solid rgba(255,255,255,.06)}
+.item:hover{background:rgba(255,255,255,.05)}
+.item .nm{color:#f1f5f9}
+.item .sb{color:#7c8aa5}
+.item .t{color:#64748b}
+.stat .c{background:rgba(255,255,255,.05) !important;border:1px solid rgba(255,255,255,.08)}
+.stat .c .n{color:#f1f5f9}
+.stat .c .l{color:#7c8aa5}
+.hist .h{background:rgba(255,255,255,.07) !important;color:#cbd5e1}
+.hist .h .c{color:#34d399}
+.banner{background:rgba(255,180,0,.12);color:#fbbf24;border-bottom:1px solid rgba(255,180,0,.25)}
+.msg.ass .bub{background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.1);color:#e2e8f0}
+.bub code.ic{background:rgba(15,23,42,.6) !important;color:#f472b6}
+.bub blockquote{color:#94a3b8;border-left-color:#334155}
+.typing{color:#7c8aa5}
+.res{background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.09)}
+.res .doc{color:#34d399}
+.res .tx{color:#cbd5e1}
+.res .sc{color:#64748b}
+.empty{color:#7c8aa5}
+.topbar .t{color:#f1f5f9}
+.row label{color:#94a3b8}</style>
+</head>
+<body>
+<header>
+<a href="/">← 返回</a>
+<div class="tt">⚙️ 运维脚本</div>
+<button id="newBtn">＋ 新建</button>
+</header>
+<div class="card">
+<h3>脚本列表</h3>
+<div id="list"><div class="empty">加载中…</div></div>
+</div>
+<div class="card" id="editor" style="display:none">
+<h3 id="editTitle">编辑脚本</h3>
+<input type="hidden" id="curId">
+<label>脚本名称</label><input id="sName" placeholder="如 备份数据库">
+<label>描述（可选）</label><input id="sDesc" placeholder="一句话说明">
+<label>脚本内容（bash）</label><textarea id="sContent" placeholder="#!/bin/bash&#10;echo hello"></textarea>
+<div class="runbar">
+<button id="saveBtn">保存脚本</button>
+<button id="runBtn">执行</button>
+<select id="timeout"><option value="15">15s</option><option value="60" selected>60s</option><option value="300">300s</option></select>
+</div>
+<div class="out" id="out" style="display:none"></div>
+</div>
+<div class="card">
+<h3>执行历史</h3>
+<div class="hist" id="hist"><div class="empty">暂无</div></div>
+</div>
+<div class="toast" id="toast"></div>
+<script>
+function $(id){return document.getElementById(id)}
+function toast(m){var t=$('toast');t.textContent=m;t.style.display='block';clearTimeout(window.__tt);window.__tt=setTimeout(function(){t.style.display='none'},2500)}
+function api(path,opts){opts=opts||{};return fetch(path,opts).then(function(r){if(r.status===401){location.href='/login';throw new Error('unauthorized')}return r.json()})}
+function loadList(){
+
+  api('/api/scripts').then(function(d){
+    var l=$('list');l.innerHTML='';
+    var arr=d.scripts||[];
+    if(!arr.length){l.innerHTML='<div class="empty">暂无脚本，点右上「＋ 新建」</div>';return}
+    arr.forEach(function(s){
+      var it=document.createElement('div');it.className='item';
+      var mid=document.createElement('div');mid.className='mid';
+      mid.innerHTML='<div class="nm">'+s.name+'</div><div class="sb">'+(s.desc||'')+'</div>';
+      it.appendChild(mid);
+      it.onclick=function(){openScript(s.id)};
+      var del=document.createElement('button');del.className='del';del.textContent='删';
+      del.onclick=function(ev){ev.stopPropagation();if(!confirm('删除脚本「'+s.name+'」？'))return;api('/api/scripts/'+s.id,{method:'DELETE'}).then(function(){toast('已删除');loadList();if($('curId').value===s.id)newScript()})};
+      it.appendChild(del);l.appendChild(it);
+    });
+  }).catch(function(){});
+}
+function openScript(id){
+  api('/api/scripts/'+id).then(function(d){
+    if(d.error){toast(d.error);return}
+    $('curId').value=d.id;$('sName').value=d.name;$('sDesc').value=d.desc||'';$('sContent').value=d.content;
+    $('editTitle').textContent='编辑：'+d.name;
+    $('editor').style.display='block';
+  });
+}
+function newScript(){
+  $('curId').value='';$('sName').value='';$('sDesc').value='';$('sContent').value='';
+  $('editTitle').textContent='新建脚本';
+  $('editor').style.display='block';
+  $('out').style.display='none';
+  window.scrollTo(0,$('editor').offsetTop);
+}
+$('newBtn').onclick=newScript;
+$('saveBtn').onclick=function(){
+  var name=$('sName').value.trim();
+  var content=$('sContent').value;
+  if(!name||!content){toast('请填写名称和内容');return}
+  var body={name:name,desc:$('sDesc').value.trim(),content:content};
+  if($('curId').value)body.id=$('curId').value;
+  api('/api/scripts',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)}).then(function(d){if(d.error){toast(d.error)}else{toast('已保存');$('curId').value=d.id;loadList()}});
+};
+$('runBtn').onclick=function(){
+  var id=$('curId').value;
+  if(!id){toast('请先保存脚本');return}
+  var btn=$('runBtn');btn.disabled=true;btn.textContent='执行中…';
+  var out=$('out');out.style.display='block';out.innerHTML='<div class="meta">执行中…</div>';
+  api('/api/scripts/'+id+'/run',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({timeout:parseInt($('timeout').value||'60',10)})}).then(function(d){
+    if(d.error){out.innerHTML='<div class="meta">'+d.error+'</div>';return}
+    var html='<div class="meta">exit='+d.exit_code+' · '+d.elapsed+'s'+(d.timed_out?' · 已超时':'')+(d.truncated?' · 输出截断':'')+'</div>';
+    if(d.stdout)html+='<div>'+d.stdout.replace(/</g,'&lt;')+'</div>';
+    if(d.stderr)html+='<div class="err">'+d.stderr.replace(/</g,'&lt;')+'</div>';
+    out.innerHTML=html;
+    loadHist();
+  }).catch(function(e){out.innerHTML='<div class="meta">请求失败：'+e.message+'</div>'}).finally(function(){btn.disabled=false;btn.textContent='执行'})
+};
+function loadHist(){
+  api('/api/scripts/history').then(function(d){
+    var h=$('hist');h.innerHTML='';
+    var arr=d.history||[];
+    if(!arr.length){h.innerHTML='<div class="empty">暂无</div>';return}
+    arr.forEach(function(x){var s=document.createElement('span');s.className='h';s.textContent=x.time+' ';var b=document.createElement('span');b.className='c';b.textContent=x.name+' (exit '+x.code+')';s.appendChild(b);h.appendChild(s)});
+  });
+}
+loadList();loadHist();
+</script>
+</body>
+</html>

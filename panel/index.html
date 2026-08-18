@@ -1,0 +1,165 @@
+<!doctype html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
+<title>{{PANEL_NAME}}</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,'PingFang SC','Microsoft YaHei',sans-serif;min-height:100vh;background:#22344f;position:relative;color:#e2e8f0;padding:16px 14px 30px;max-width:640px;margin:0 auto}
+body::before{content:'';position:fixed;top:0;left:0;right:0;bottom:0;z-index:-1;background:var(--bg-layer,radial-gradient(1200px 600px at 20% -10%,#3a5a8f 0%,#22344f 55%));background-size:cover;filter:blur(var(--bg-blur,0px))}
+
+.top{display:flex;align-items:center;gap:12px;padding:6px 2px 14px}
+.logo{width:48px;height:48px;border-radius:16px;background:linear-gradient(135deg,#34d399,#059669);display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:800;color:#fff;box-shadow:0 6px 20px rgba(16,185,129,.35),inset 0 1px 0 rgba(255,255,255,.3);flex-shrink:0}
+.tbinfo{flex:1;min-width:0}
+.ttl{font-size:20px;font-weight:800;letter-spacing:.5px;background:linear-gradient(90deg,#f1f5f9,#94a3b8);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
+.sub{font-size:11.5px;color:#64748b;margin-top:2px}
+.st{text-align:right}
+.st .dot{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:4px;vertical-align:1px}
+.st .stxt{font-size:12px;color:#94a3b8}
+.time{font-size:19px;font-weight:700;font-family:ui-monospace,Menlo,monospace;color:#f1f5f9;margin-top:3px;letter-spacing:1px}
+.time small{font-size:11px;color:#64748b;font-weight:400;margin-left:4px}
+
+.stats{display:flex;gap:10px;margin:2px 0 14px}
+.chip{flex:1;background:rgba(255,255,255,.025);border:1px solid rgba(255,255,255,.05);border-radius:14px;padding:10px 6px 9px;text-align:center;backdrop-filter:blur(6px)}
+.chip .n{font-size:24px;font-weight:800;font-family:ui-monospace,Menlo,monospace}
+.chip .l{font-size:11px;color:#64748b;margin-top:2px}
+.chip.c1 .n{color:#34d399}.chip.c2 .n{color:#60a5fa}.chip.c3 .n{color:#fbbf24}
+
+.tools{display:flex;gap:8px;justify-content:flex-end;margin-bottom:14px}
+.tools a{display:inline-flex;align-items:center;gap:4px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.08);color:#cbd5e1;text-decoration:none;padding:7px 14px;border-radius:20px;font-size:12.5px}
+.tools a:active{transform:scale(.96)}
+.tools a.refresh{color:#34d399}
+
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.card{position:relative;border-radius:18px;padding:16px 14px 14px;min-height:112px;overflow:hidden;cursor:pointer;background:linear-gradient(160deg,rgba(255,255,255,.045),rgba(255,255,255,.008));border:1px solid rgba(255,255,255,.05);box-shadow:0 8px 24px rgba(0,0,0,.35),inset 0 1px 0 rgba(255,255,255,.06);transition:transform .12s ease}
+.card:active{transform:scale(.97)}
+.card::before{content:'';position:absolute;left:0;top:0;bottom:0;width:4px;background:linear-gradient(180deg,var(--accent),transparent);opacity:.85}
+.card::after{content:'';position:absolute;right:-30px;top:-30px;width:90px;height:90px;border-radius:50%;background:radial-gradient(circle,var(--accent) 0%,transparent 70%);opacity:.16}
+.card .ic{width:40px;height:40px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:800;color:#fff;background:linear-gradient(135deg,var(--accent),rgba(255,255,255,.12));box-shadow:0 4px 12px rgba(0,0,0,.3),inset 0 1px 0 rgba(255,255,255,.25)}
+.card .nm{font-size:15px;font-weight:700;margin-top:12px;color:#f1f5f9}
+.card .sb{font-size:11.5px;color:#7c8aa5;margin-top:3px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.card .dot{position:absolute;top:14px;right:14px;width:9px;height:9px;border-radius:50%;box-shadow:0 0 8px currentColor}
+.card .lat{position:absolute;right:14px;top:30px;font-size:10px;color:#64748b;font-family:ui-monospace,Menlo,monospace}
+
+.evwrap{background:rgba(255,255,255,.02);border:1px solid rgba(255,255,255,.05);border-radius:16px;padding:12px 14px;margin-top:16px}
+.evwrap h3{font-size:13px;color:#94a3b8;margin-bottom:8px;letter-spacing:.5px}
+.ev{display:flex;align-items:center;gap:8px;padding:6px 0;font-size:12.5px;color:#cbd5e1;border-bottom:1px solid rgba(255,255,255,.05)}
+.ev:last-child{border-bottom:none}
+.ev .t{color:#64748b;font-size:11px;white-space:nowrap;font-family:ui-monospace,Menlo,monospace}
+.ev .n{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.badge{padding:2px 8px;border-radius:10px;font-size:11px;white-space:nowrap}
+.badge.down{background:rgba(239,68,68,.15);color:#f87171}
+.badge.up{background:rgba(52,211,153,.15);color:#34d399}
+
+.toast{display:none;position:fixed;left:50%;bottom:40px;transform:translateX(-50%);background:rgba(15,23,42,.92);border:1px solid rgba(255,255,255,.12);color:#f1f5f9;padding:9px 18px;border-radius:22px;font-size:13px;z-index:99;max-width:82%;box-shadow:0 8px 30px rgba(0,0,0,.5);backdrop-filter:blur(8px)}
+body.light{color:#1a1c1e}
+body.light .ttl{-webkit-text-fill-color:#1a1c1e}
+body.light .time{color:#1a1c1e}
+body.light .st .stxt{color:#5a6068}
+body.light .card{background:#ffffff;border:1px solid #e6e9ee}
+body.light .card .nm{color:#1a1c1e}
+body.light .card .sb{color:#5a6068}
+body.light .chip{background:#ffffff;border:1px solid #e6e9ee}
+body.light .evwrap{background:#ffffff;border:1px solid #e6e9ee}
+body.light .ev{color:#37474f}
+body.light .ev .t{color:#8a9099}
+body.light .tools a{background:#fff;border:1px solid #e6e9ee;color:#37474f}</style>
+</head>
+<body>
+<div class="top">
+<div class="logo">{{PANEL_LOGO}}</div>
+<div class="tbinfo">
+<div class="ttl">{{PANEL_NAME}}</div>
+<div class="sub" id="subtitle">{{PANEL_SUB}} · 加载中</div>
+</div>
+<div class="st">
+<div><span class="dot" id="dot"></span><span class="stxt" id="status">连接中</span></div>
+<div class="time" id="time">--:--:--<small id="ampm"></small></div>
+</div>
+</div>
+
+<div class="stats">
+<div class="chip c1"><div class="n" id="statTotal">-</div><div class="l">服务数</div></div>
+<div class="chip c2"><div class="n" id="statOnline">-</div><div class="l">在线</div></div>
+<div class="chip c3"><div class="n" id="statPorts">-</div><div class="l">端口开放</div></div>
+</div>
+
+<div class="tools">
+<a href="/models" id="modelBtn">🧩 模型</a><a href="#" id="refreshBtn">⟳ 刷新</a>
+<a href="/admin" id="adminBtn">⚙ 管理</a>
+</div>
+
+<div class="grid" id="grid"></div>
+
+<div class="evwrap" id="evWrap" style="display:none"><h3>📡 最近事件</h3><div id="events"></div></div>
+
+<div class="toast" id="toast"></div>
+<script>
+function applyBg(c){
+  var b=document.body;
+  b.classList.remove('light');
+  var dk=(typeof c.bg_darkness==='number'?c.bg_darkness:55);
+  var bl=c.bg_blur||0;
+  b.style.setProperty('--bg-blur',bl+'px');
+  var layer='';
+  if(c.bg_type==='image'&&c.bg_value){layer='linear-gradient(rgba(10,16,32,'+(dk/100)+'),rgba(10,16,32,'+(dk/100)+')),url('+c.bg_value+') center/cover no-repeat fixed';}
+  else if(c.bg_type==='color'&&c.bg_value){layer=c.bg_value;}
+  else if(c.bg_type==='light'){b.classList.add('light');layer='linear-gradient(160deg,#eef2f9,#dde5f0) fixed';}
+  else{var lum=1-dk/130;layer='radial-gradient(1200px 600px at 20% -10%,rgba(58,90,143,'+lum+') 0%,rgba(34,52,79,'+Math.max(0.2,lum-0.12)+') 55%),#22344f';}
+  b.style.setProperty('--bg-layer',layer);
+}
+fetch('/api/ui').then(function(r){return r.json()}).then(function(c){applyBg(c||{})}).catch(function(){});
+window.onerror=function(m,src,ln,col){var t=document.getElementById('status');t.textContent='JS错误: '+m;t.style.color='#fbbf24';return false;};
+function $(id){return document.getElementById(id)}
+function dotColor(s){return s==='online'?'#34d399':(s==='offline'?'#f87171':'rgba(255,255,255,.25)')}
+function toast(m){var t=$('toast');t.textContent=m;t.style.display='block';clearTimeout(window.__t);window.__t=setTimeout(function(){t.style.display='none'},1800)}
+function render(data){
+var g=$('grid');g.innerHTML='';
+data.services.forEach(function(s){
+var c=document.createElement('div');c.className='card';
+c.style.setProperty('--accent', s.color||'#3B82F6');
+var lat=s.latency>0?'<div class="lat">'+s.latency+'ms</div>':'';
+c.innerHTML='<div class="ic">'+(s.icon||(s.name?s.name.charAt(0):'?'))+'</div><div class="dot" style="color:'+dotColor(s.status)+';background:'+dotColor(s.status)+'"></div><div class="nm">'+s.name+'</div><div class="sb">'+s.sub+'</div>'+lat;
+c.onclick=function(){if(s.url){location.href=s.url}else{toast(s.name+'：未部署 · 待接入')}};
+g.appendChild(c);
+});
+var st=data.stats;
+var el;if((el=document.getElementById('statTotal')))el.textContent=st.total;
+if((el=document.getElementById('statOnline')))el.textContent=st.online+'/'+st.total;
+if((el=document.getElementById('statPorts')))el.textContent=st.ports;
+if((el=document.getElementById('subtitle')))el.textContent='{{PANEL_SUB}} · 标识:'+(/Windows|Macintosh|X11/i.test(navigator.userAgent)?'电脑':'手机');
+if((el=document.getElementById('status')))el.textContent=st.online>=1?'已连接':'未连接';
+if((el=document.getElementById('dot')))el.style.background=st.online>=1?'#34d399':'#f87171';
+if((el=document.getElementById('status')))el.style.color=st.online>=1?'#34d399':'#f87171';
+}
+function loadHistory(){
+fetch('/api/history').then(function(r){return r.json()}).then(function(d){
+var evs=d.events||[];var w=$('evWrap');var c=$('events');c.innerHTML='';
+if(!evs.length){w.style.display='none';return}
+w.style.display='block';
+evs.slice(0,5).forEach(function(e){
+var down=e.to==='offline';
+var div=document.createElement('div');div.className='ev';
+div.innerHTML='<span class="t">'+e.time.slice(11,16)+'</span><span class="n">'+e.name+'</span><span class="badge '+(down?'down':'up')+'">'+(down?'掉线':'恢复')+'</span>';
+c.appendChild(div);
+});
+});
+}
+function load(){
+var st=document.getElementById('status');st.textContent='请求中…';st.style.color='#94a3b8';
+var ctrl=new AbortController();var timer=setTimeout(function(){ctrl.abort()},8000);
+fetch('/api/status',{signal:ctrl.signal}).then(function(r){clearTimeout(timer);if(r.status===401){location.href='/login';return null}return r.json();})
+.then(function(d){if(d)render(d);})
+.catch(function(e){var t=document.getElementById('status');t.textContent='连接失败: '+(e&&e.message?e.message:e);t.style.color='#f87171';});
+}
+function tick(){try{var d=new Date();var h=d.getHours();var hh=h%12;if(hh===0)hh=12;var ts=String(hh).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0')+':'+String(d.getSeconds()).padStart(2,'0');var t=document.getElementById('time');if(t)t.textContent=ts;var a=document.getElementById('ampm');if(a)a.textContent=(h>=12?'PM':'AM');}catch(e){}}
+load();loadHistory();
+setInterval(load,30000);setInterval(loadHistory,30000);
+try{setInterval(tick,1000);tick();}catch(e){}
+var rb=document.getElementById('refreshBtn');if(rb)rb.onclick=function(e){e.preventDefault();load();loadHistory()};
+var ab=document.getElementById('adminBtn');if(ab)ab.onclick=function(e){e.preventDefault();location.href='/admin'};
+var evw=document.getElementById('evWrap');if(evw&&!evw._done){evw._done=true;}
+</script>
+</body>
+</html>

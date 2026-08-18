@@ -1,0 +1,123 @@
+<!doctype html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<title>管理</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,'PingFang SC','Microsoft YaHei',sans-serif;background:radial-gradient(1000px 500px at 20% -10%,#3a5a8f 0%,#22344f 60%),#22344f;background-attachment:fixed;color:#e2e8f0;padding:12px;max-width:640px;margin:0 auto;padding-bottom:24px}
+.topbar{display:flex;align-items:center;gap:10px;margin-bottom:12px}
+.topbar a{background:#2e7d32;color:#fff;padding:6px 12px;border-radius:16px;text-decoration:none;font-size:13px}
+.topbar .t{font-size:18px;font-weight:700;color:#f1f5f9;flex:1}
+.topbar .m{background:#3949AB;color:#fff;padding:6px 12px;border-radius:16px;text-decoration:none;font-size:13px}
+.card{background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.09);border-radius:14px;padding:14px;margin-bottom:12px;backdrop-filter:blur(6px)}
+.card h3{font-size:15px;color:#f1f5f9;margin-bottom:8px}
+label{display:block;font-size:12px;color:#94a3b8;margin:10px 0 4px}
+input,select{width:100%;padding:8px;border:1px solid rgba(255,255,255,.15);border-radius:8px;font-size:14px;background:rgba(15,23,42,.6);color:#e2e8f0}
+input::placeholder{color:#64748b}
+.row{display:flex;gap:8px}
+.row>div{flex:1}
+.pal{display:flex;flex-wrap:wrap;gap:6px;margin-top:4px}
+.sw{width:32px;height:32px;border-radius:50%;cursor:pointer;border:2px solid transparent}
+.sw.sel{border:2px solid #f1f5f9}
+button.primary{width:100%;padding:10px;background:#2e7d32;color:#fff;border:none;border-radius:8px;font-size:15px;margin-top:14px;cursor:pointer}
+.item{display:flex;align-items:center;gap:8px;padding:10px 0;border-bottom:1px solid rgba(255,255,255,.06)}
+.item:last-child{border-bottom:none}
+.item .ic{width:30px;height:30px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:800;color:#fff;flex-shrink:0}
+.item .mid{flex:1;min-width:0}
+.item .nm{font-size:14px;font-weight:600;color:#f1f5f9}
+.item .sub{font-size:12px;color:#7c8aa5;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.item .btn{border:none;border-radius:6px;padding:5px 10px;font-size:12px;color:#fff;cursor:pointer}
+.item .edit{background:#1e88e5;margin-right:6px}
+.item .del{background:#e53935}
+.hint{font-size:12px;color:#7c8aa5;margin-top:4px}
+.link{display:block;text-align:center;padding:10px;border-radius:8px;text-decoration:none;font-size:14px;margin-top:8px;color:#fff}
+.toast{display:none;position:fixed;left:50%;bottom:40px;transform:translateX(-50%);background:rgba(15,23,42,.92);border:1px solid rgba(255,255,255,.12);color:#f1f5f9;padding:9px 18px;border-radius:22px;font-size:13px;z-index:99;max-width:80%}
+</style>
+</head>
+<body>
+<div class="topbar">
+<a href="/">← 返回</a>
+<span class="t">管理</span>
+<a class="m" href="/models">模型配置</a>
+<a class="m" href="/appearance">外观</a>
+</div>
+
+<div class="card">
+<h3 id="formTitle">新增服务</h3>
+<input type="hidden" id="f_id">
+<label>名称 *</label><input id="f_name" placeholder="如 AstrBot 聊天">
+<label>副标题</label><input id="f_sub" placeholder="如 机器人 · 6185">
+<label>图标（1-2 个字符，如 W / AI / 盾，留空取服务名首字）</label><input id="f_icon" placeholder="如 W / AI / 盾">
+<label>颜色</label>
+<div class="pal" id="palette"></div>
+<label>类型</label>
+<select id="f_kind">
+<option value="none">无探活（纯入口）</option>
+<option value="http">HTTP 探活</option>
+<option value="tcp">TCP 探活</option>
+<option value="self">本面板</option>
+</select>
+<div id="g_http" style="display:none"><label>HTTP 探活地址</label><input id="f_target" placeholder="http://127.0.0.1:6185/"></div>
+<div id="g_tcp" style="display:none">
+<div class="row">
+<div><label>TCP 主机</label><input id="f_host" placeholder="127.0.0.1"></div>
+<div><label>TCP 端口</label><input id="f_port" type="number" placeholder="6099"></div>
+</div>
+</div>
+<label>跳转地址端口（public_port，可选）</label><input id="f_pp" type="number" placeholder="如 6185">
+<label>跳转子路径（path，可选）</label><input id="f_path" placeholder="如 /app/">
+<button class="primary" onclick="submitForm()">保存服务</button>
+</div>
+
+<div class="card">
+<h3>现有服务</h3>
+<div id="list"><div class="hint">加载中…</div></div>
+</div>
+
+<div class="card">
+<h3>语音设置</h3>
+<label>千问 Realtime API Key</label><input id="v_key" type="password" placeholder="待接入，先留空">
+<label>模型名</label><input id="v_model" placeholder="如 qwen-realtime">
+<label style="display:flex;align-items:center;gap:8px;margin-top:12px;font-size:14px"><input type="checkbox" id="v_enabled" style="width:auto;margin:0"> 启用语音</label>
+<button class="primary" onclick="saveVoice()">保存语音设置</button>
+</div>
+
+<div class="card">
+<h3>模型配置</h3>
+<div class="hint">统一管理 Pi 编码模型与知识库向量模型（服务商 / 地址 / Key / 获取模型 / 选择）</div>
+<a class="link" href="/models" style="background:#3949AB">打开模型配置</a>
+</div>
+
+<div class="card">
+<h3>外观设置</h3>
+<div class="hint">背景类型 / 本地上传图片 / 深浅度 / 模糊</div>
+<a class="link" href="/appearance" style="background:#00695c">打开外观设置</a>
+</div>
+
+<div class="toast" id="toast"></div>
+<script>
+var PALETTE=['#1E88E5','#00897B','#F4511E','#8E24AA','#00ACC1','#E53935','#3949AB','#43A047','#EF6C00','#D81B60','#5E35B1','#37474F'];
+var services=[];
+var selectedColor='#1E88E5';
+function $(id){return document.getElementById(id)}
+function toast(m){var t=$('toast');t.textContent=m;t.style.display='block';clearTimeout(window.__tt);window.__tt=setTimeout(function(){t.style.display='none'},1800)}
+function loadPalette(){var p=$('palette');p.innerHTML='';PALETTE.forEach(function(c){var d=document.createElement('div');d.className='sw'+(c===selectedColor?' sel':'');d.style.background=c;d.onclick=function(){selectedColor=c;loadPalette()};p.appendChild(d)})}
+function kindChange(){var k=$('f_kind').value;$('g_http').style.display=k==='http'?'block':'none';$('g_tcp').style.display=k==='tcp'?'block':'none'}
+function loadVoice(){fetch('/api/voice/config').then(function(r){return r.json()}).then(function(d){$('v_key').value=d.apiKey||'';$('v_model').value=d.model||'';$('v_enabled').checked=!!d.enabled})}
+function saveVoice(){var d={apiKey:$('v_key').value.trim(),model:$('v_model').value.trim(),enabled:$('v_enabled').checked};fetch('/api/voice/config',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(d)}).then(function(r){return r.json()}).then(function(){toast('已保存')})}
+function load(){fetch('/api/services').then(function(r){return r.json()}).then(function(d){services=d.services||[];renderList()}).catch(function(){toast('加载失败')})}
+function saveAll(){return fetch('/api/services',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(services)}).then(function(r){return r.json()})}
+function renderList(){var l=$('list');l.innerHTML='';if(!services.length){l.innerHTML='<div class="hint">暂无服务</div>';return}services.forEach(function(s){var d=document.createElement('div');d.className='item';var ic=document.createElement('span');ic.className='ic';ic.style.background=s.color||'#3B82F6';ic.textContent=s.icon||(s.name?s.name.charAt(0):'?');var mid=document.createElement('div');mid.className='mid';mid.innerHTML='<div class="nm">'+s.name+'</div><div class="sub">'+s.sub+'</div>';var eb=document.createElement('button');eb.className='btn edit';eb.textContent='编辑';eb.onclick=function(){edit(s)};var db=document.createElement('button');db.className='btn del';db.textContent='删';db.onclick=function(){del(s.id,db)};d.appendChild(ic);d.appendChild(mid);d.appendChild(eb);d.appendChild(db);l.appendChild(d)})}
+function edit(s){$('formTitle').textContent='编辑：'+s.name;$('f_id').value=s.id||'';$('f_name').value=s.name||'';$('f_sub').value=s.sub||'';$('f_icon').value=s.icon||'';selectedColor=s.color||'#1E88E5';loadPalette();$('f_kind').value=s.kind||'none';kindChange();$('f_target').value=s.target||'';$('f_host').value=s.host||'';$('f_port').value=s.port||'';$('f_pp').value=s.public_port||'';$('f_path').value=s.path||'';window.scrollTo(0,0)}
+function submitForm(){var name=$('f_name').value.trim();if(!name){toast('请填写名称');return}var s={id:$('f_id').value||('s'+Date.now()),name:name,icon:$('f_icon').value.trim(),color:selectedColor,kind:$('f_kind').value};if($('f_sub').value.trim())s.sub=$('f_sub').value.trim();if(s.kind==='http'&&$('f_target').value.trim())s.target=$('f_target').value.trim();if(s.kind==='tcp'){s.host=$('f_host').value.trim();var p=parseInt($('f_port').value||'0',10);if(p>0)s.port=p}var pp=parseInt($('f_pp').value||'0',10);if(pp>0)s.public_port=pp;if($('f_path').value.trim())s.path=$('f_path').value.trim();var idx=-1;services.forEach(function(x,i){if(x.id===s.id)idx=i});if(idx>=0)services[idx]=s;else services.push(s);saveAll().then(function(){toast('已保存');resetForm();load()}).catch(function(){toast('保存失败')})}
+function del(id,btn){if(btn.dataset.confirm==='1'){services=services.filter(function(s){return s.id!==id});saveAll().then(function(){toast('已删除');load()}).catch(function(){toast('删除失败')})}else{btn.dataset.confirm='1';btn.textContent='确认?';setTimeout(function(){btn.dataset.confirm='';btn.textContent='删'},2500)}}
+function resetForm(){$('formTitle').textContent='新增服务';$('f_id').value='';$('f_name').value='';$('f_sub').value='';$('f_icon').value='';$('f_target').value='';$('f_host').value='';$('f_port').value='';$('f_pp').value='';$('f_path').value='';selectedColor='#1E88E5';loadPalette();$('f_kind').value='none';kindChange()}
+$('f_kind').onchange=kindChange;
+loadPalette();
+load();
+loadVoice();
+</script>
+</body>
+</html>

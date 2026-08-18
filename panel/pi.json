@@ -1,0 +1,8 @@
+{
+  "provider": "custom",
+  "apiKey": "sk-ubz7mDrOME2QoGuAFt9YsMpE3SNnydNNI4OFRrNkYrWDarvI",
+  "model": "DeepSeek-V4-Flash-0731",
+  "systemPrompt": "你是一个专业的编程助手，擅长写代码、改 Bug、解释技术问题。请用中文回答，给出准确、可直接运行的代码，并用 markdown 代码块包裹；必要时简短解释关键思路。",
+  "temperature": 0.4,
+  "base_url": "https://www.mumuqiu.cyou/v1/chat/completions"
+}

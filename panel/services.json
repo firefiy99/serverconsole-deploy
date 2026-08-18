@@ -1,0 +1,110 @@
+[
+  {
+    "color": "#1E88E5",
+    "icon": "W",
+    "id": "webui",
+    "kind": "self",
+    "name": "WebUI",
+    "sub": "聚合面板"
+  },
+  {
+    "color": "#8E24AA",
+    "icon": "AI",
+    "id": "astrbot",
+    "kind": "http",
+    "name": "AstrBot 聊天",
+    "public_port": 6185,
+    "sub": "机器人 · 6185",
+    "target": "http://127.0.0.1:6185/"
+  },
+  {
+    "color": "#00ACC1",
+    "host": "127.0.0.1",
+    "icon": "N",
+    "id": "napcat",
+    "kind": "tcp",
+    "name": "NapCat",
+    "port": 6099,
+    "public_port": 6099,
+    "sub": "QQ 协议 · 6099"
+  },
+  {
+    "color": "#F4511E",
+    "host": "127.0.0.1",
+    "icon": "G",
+    "id": "gsuid",
+    "kind": "tcp",
+    "name": "Gsuid",
+    "path": "/app/",
+    "port": 8765,
+    "public_port": 8765,
+    "sub": "8765"
+  },
+  {
+    "color": "#E53935",
+    "host": "127.0.0.1",
+    "icon": "R",
+    "id": "remote",
+    "kind": "self",
+    "name": "远程协助",
+    "port": 8082,
+    "sub": "远程命令 · 面板内置",
+    "url": "/remote"
+  },
+  {
+    "color": "#5E35B1",
+    "host": "127.0.0.1",
+    "icon": "H",
+    "id": "harness",
+    "kind": "tcp",
+    "name": "Harness",
+    "port": 8443,
+    "sub": "DeepSeek智能体 · 8443",
+    "url": "https://{host}:8443"
+  },
+  {
+    "color": "#EF6C00",
+    "icon": "K",
+    "id": "kb",
+    "kind": "self",
+    "name": "共享知识库",
+    "sub": "共享知识库 · 面板内置",
+    "url": "/kb"
+  },
+  {
+    "color": "#3949AB",
+    "icon": "P",
+    "id": "pi",
+    "kind": "self",
+    "name": "Pi 编码助手",
+    "sub": "编码助手 · 面板内置",
+    "url": "/pi"
+  },
+  {
+    "color": "#43A047",
+    "icon": "S",
+    "id": "script",
+    "kind": "self",
+    "name": "运维脚本",
+    "sub": "运维脚本 · 面板内置",
+    "url": "/scripts"
+  },
+  {
+    "color": "#D81B60",
+    "icon": "V",
+    "id": "voice",
+    "kind": "none",
+    "name": "语音通话",
+    "sub": "语音通话",
+    "url": "serverconsole://voice"
+  },
+  {
+    "color": "#37474F",
+    "icon": "盾",
+    "id": "security",
+    "kind": "self",
+    "name": "安全",
+    "sub": "安全 · 面板内置",
+    "url": "/security"
+  }
+]

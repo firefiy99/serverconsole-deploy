@@ -1,0 +1,5 @@
+{
+  "ban_seconds": 1800,
+  "login_window": 30,
+  "login_max": 10
+}
