@@ -1,1 +1,114 @@
-[]
+[
+  {
+    "id": "default_restart_astrbot",
+    "name": "一键重启 AstrBot",
+    "desc": "重启 astrbot 容器（QQ 机器人核心）",
+    "content": "docker restart astrbot && echo 'AstrBot 已重启' && docker ps --filter name=astrbot --format '状态: {{.Status}}'",
+    "created": 1787060000
+  },
+  {
+    "id": "default_restart_napcat",
+    "name": "一键重启 NapCat",
+    "desc": "重启 napcat 容器（QQ 协议端）",
+    "content": "docker restart napcat && echo 'NapCat 已重启' && docker ps --filter name=napcat --format '状态: {{.Status}}'",
+    "created": 1787060000
+  },
+  {
+    "id": "default_restart_gsuid",
+    "name": "一键重启 GsCore",
+    "desc": "重启 gsuid_core 容器（Genshin 小助手）",
+    "content": "docker restart gsuid_core && echo 'GsCore 已重启' && docker ps --filter name=gsuid_core --format '状态: {{.Status}}'",
+    "created": 1787060000
+  },
+  {
+    "id": "default_container_status",
+    "name": "容器状态总览",
+    "desc": "查看所有运行中容器的状态、端口、健康度",
+    "content": "docker ps --format 'table {{.Names}}\\t{{.Status}}\\t{{.Ports}}'",
+    "created": 1787060000
+  },
+  {
+    "id": "default_astrbot_log",
+    "name": "查看 AstrBot 日志",
+    "desc": "读取 astrbot 容器日志文件尾部（非阻塞，alpine 挂载方式）",
+    "content": "docker run --rm -v /var/lib/docker:/var/lib/docker nginx:alpine sh -c 'tail -c 200000 /var/lib/docker/containers/3cc8c1c3a984abd4c59d7649f96c3f7e31c57aae894e66236e9f4d9fd7de6baa/3cc8c1c3a984abd4c59d7649f96c3f7e31c57aae894e66236e9f4d9fd7de6baa-json.log' | python3 -c \"\nimport sys, json\nfor line in sys.stdin.buffer.read().decode('utf-8','ignore').splitlines()[-50:]:\n    try:\n        d = json.loads(line)\n        ts = d.get('time','')[:19]\n        log = d.get('log','')\n        print(ts, log.rstrip())\n    except Exception:\n        print(line[:200])\n\" ",
+    "created": 1787060000
+  },
+  {
+    "id": "default_napcat_log",
+    "name": "查看 NapCat 日志",
+    "desc": "读取 napcat 容器日志文件尾部（非阻塞，alpine 挂载方式）",
+    "content": "docker run --rm -v /var/lib/docker:/var/lib/docker nginx:alpine sh -c 'tail -c 200000 /var/lib/docker/containers/34fef78b853831cd3e66f3d230068f4a2112347163624d0518a49abe0a0fa046/34fef78b853831cd3e66f3d230068f4a2112347163624d0518a49abe0a0fa046-json.log' | python3 -c \"\nimport sys, json\nfor line in sys.stdin.buffer.read().decode('utf-8','ignore').splitlines()[-50:]:\n    try:\n        d = json.loads(line)\n        ts = d.get('time','')[:19]\n        log = d.get('log','')\n        print(ts, log.rstrip())\n    except Exception:\n        print(line[:200])\n\" ",
+    "created": 1787060000
+  },
+  {
+    "id": "default_disk_usage",
+    "name": "磁盘空间检查",
+    "desc": "查看服务器磁盘、内存、负载使用情况",
+    "content": "df -h / && echo '---' && free -h && echo '---' && uptime",
+    "created": 1787060000
+  },
+  {
+    "id": "default_docker_clean",
+    "name": "清理 Docker 垃圾",
+    "desc": "清理悬空镜像、停止的容器、无用缓存（保留使用中的）",
+    "content": "docker system prune -f --volumes 2>&1 | tail -5",
+    "created": 1787060000
+  },
+  {
+    "id": "default_backup_astrbot",
+    "name": "备份 AstrBot 数据",
+    "desc": "备份 astrbot 容器数据（/AstrBot/data）到面板 backups，自动保留最近3份",
+    "content": "mkdir -p /app/backups && docker exec astrbot sh -c 'tar czf /tmp/astrbot_data.tar.gz --warning=no-file-changed -C /AstrBot data 2>/dev/null || true' && docker cp astrbot:/tmp/astrbot_data.tar.gz /app/backups/astrbot_$(date +%Y%m%d_%H%M%S).tar.gz && docker exec astrbot rm -f /tmp/astrbot_data.tar.gz && ls -t /app/backups/astrbot_*.tar.gz | tail -n +4 | xargs -r rm -f && echo \"AstrBot 备份完成:\" && ls -lh /app/backups/ | tail -3",
+    "created": 1787061000
+  },
+  {
+    "id": "default_backup_panel",
+    "name": "备份面板配置",
+    "desc": "打包备份面板配置（json/网页/app.py，排除备份/apk/日志）到 backups，自动保留最近3份",
+    "content": "mkdir -p /app/backups && tar czf /app/backups/panel_$(date +%Y%m%d_%H%M%S).tar.gz --exclude=./backups --exclude=./apk --exclude=./log --exclude=./bg -C /app . 2>&1 && ls -t /app/backups/panel_*.tar.gz | tail -n +4 | xargs -r rm -f && echo \"面板配置备份完成:\" && ls -lh /app/backups/ | tail -3",
+    "created": 1787061000
+  },
+  {
+    "id": "default_clean_logs",
+    "name": "清理容器日志",
+    "desc": "清理所有容器 json 日志文件（用 alpine 临时容器挂载宿主 docker 目录）",
+    "content": "docker run --rm -v /var/lib/docker:/var/lib/docker nginx:alpine sh -c 'find /var/lib/docker/containers -name \"*-json.log\" -type f -exec truncate -s 0 {} \\;' && echo '容器日志已清空' && df -h / | tail -1",
+    "created": 1787061000
+  },
+  {
+    "id": "default_network_check",
+    "name": "网络连通性检查",
+    "desc": "用 python 检测外网/DNS/面板/GitHub 镜像连通性（容器内无 ping/curl 故用 urllib）",
+    "content": "python3 - << 'PY'\nimport urllib.request, urllib.error, socket\ndef t(url, name):\n    try:\n        urllib.request.urlopen(url, timeout=5)\n        print(name + ': OK')\n    except urllib.error.HTTPError:\n        print(name + ': OK (HTTP可达)')\n    except Exception as e:\n        print(name + ': FAIL ' + str(e)[:50])\nt('http://223.5.5.5', '外网(223.5.5.5)')\nt('http://43.139.121.191:8000', '面板8000')\nt('https://www.baidu.com', '百度')\nt('https://mirror.ghproxy.com', 'ghproxy')\ntry:\n    socket.create_connection(('223.5.5.5', 53), timeout=3)\n    print('DNS(53): OK')\nexcept Exception as e:\n    print('DNS(53): FAIL ' + str(e)[:50])\nPY",
+    "created": 1787061000
+  },
+  {
+    "id": "default_image_list",
+    "name": "镜像列表与体积",
+    "desc": "查看所有 Docker 镜像及其磁盘占用，按大小排序",
+    "content": "docker images --format 'table {{.Repository}}:{{.Tag}}\\t{{.Size}}'",
+    "created": 1787061000
+  },
+  {
+    "id": "default_restart_all",
+    "name": "一键重启全部服务",
+    "desc": "依次重启 napcat → astrbot → gsuid_core（保持依赖顺序）",
+    "content": "docker restart napcat && echo 'NapCat ✓' && docker restart astrbot && echo 'AstrBot ✓' && docker restart gsuid_core && echo 'GsCore ✓' && docker ps --format '{{.Names}}: {{.Status}}' | grep -E 'napcat|astrbot|gsuid'",
+    "created": 1787061000
+  },
+  {
+    "id": "default_memory_top",
+    "name": "内存占用 TOP10",
+    "desc": "按内存占用列出服务器 TOP10 进程",
+    "content": "ps aux --sort=-%mem | head -11",
+    "created": 1787061000
+  },
+  {
+    "id": "default_qq_groups",
+    "name": "QQ 运行状态",
+    "desc": "查看 NapCat 容器状态、QQ 数据卷占用、最近日志",
+    "content": "echo '=== NapCat 容器 ===' && docker ps --filter name=napcat --format '{{.Names}}: {{.Status}}' && echo '=== QQ 数据卷 ===' && docker run --rm -v 80fe7af471c108b67e4fef1e9f50d13cc4b272c1bce113c39d1c779222a46bf2:/data nginx:alpine sh -c 'du -sh /data 2>/dev/null'",
+    "created": 1787061000
+  }
+]

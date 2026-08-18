@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
-<title>{{PANEL_NAME}}</title>
+<title>中控台</title>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 body{font-family:-apple-system,'PingFang SC','Microsoft YaHei',sans-serif;min-height:100vh;background:#22344f;position:relative;color:#e2e8f0;padding:16px 14px 30px;max-width:640px;margin:0 auto}
@@ -68,10 +68,10 @@ body.light .tools a{background:#fff;border:1px solid #e6e9ee;color:#37474f}</sty
 </head>
 <body>
 <div class="top">
-<div class="logo">{{PANEL_LOGO}}</div>
+<div class="logo">中</div>
 <div class="tbinfo">
-<div class="ttl">{{PANEL_NAME}}</div>
-<div class="sub" id="subtitle">{{PANEL_SUB}} · 加载中</div>
+<div class="ttl">中控台</div>
+<div class="sub" id="subtitle">服务器控制台 · 加载中</div>
 </div>
 <div class="st">
 <div><span class="dot" id="dot"></span><span class="stxt" id="status">连接中</span></div>
@@ -128,7 +128,7 @@ var st=data.stats;
 var el;if((el=document.getElementById('statTotal')))el.textContent=st.total;
 if((el=document.getElementById('statOnline')))el.textContent=st.online+'/'+st.total;
 if((el=document.getElementById('statPorts')))el.textContent=st.ports;
-if((el=document.getElementById('subtitle')))el.textContent='{{PANEL_SUB}} · 标识:'+(/Windows|Macintosh|X11/i.test(navigator.userAgent)?'电脑':'手机');
+if((el=document.getElementById('subtitle')))el.textContent='服务器控制台 · 标识:'+(/Windows|Macintosh|X11/i.test(navigator.userAgent)?'电脑':'手机');
 if((el=document.getElementById('status')))el.textContent=st.online>=1?'已连接':'未连接';
 if((el=document.getElementById('dot')))el.style.background=st.online>=1?'#34d399':'#f87171';
 if((el=document.getElementById('status')))el.style.color=st.online>=1?'#34d399':'#f87171';
@@ -153,7 +153,7 @@ fetch('/api/status',{signal:ctrl.signal}).then(function(r){clearTimeout(timer);i
 .then(function(d){if(d)render(d);})
 .catch(function(e){var t=document.getElementById('status');t.textContent='连接失败: '+(e&&e.message?e.message:e);t.style.color='#f87171';});
 }
-function tick(){try{var d=new Date();var h=d.getHours();var hh=h%12;if(hh===0)hh=12;var ts=String(hh).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0')+':'+String(d.getSeconds()).padStart(2,'0');var t=document.getElementById('time');if(t)t.textContent=ts;var a=document.getElementById('ampm');if(a)a.textContent=(h>=12?'PM':'AM');}catch(e){}}
+function tick(){try{var d=new Date();var h=d.getHours();var ts=String(h).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0')+':'+String(d.getSeconds()).padStart(2,'0');var t=document.getElementById('time');if(t)t.textContent=ts;var a=document.getElementById('ampm');if(a)a.textContent='';}catch(e){}}
 load();loadHistory();
 setInterval(load,30000);setInterval(loadHistory,30000);
 try{setInterval(tick,1000);tick();}catch(e){}

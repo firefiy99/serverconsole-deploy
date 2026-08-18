@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""控制台面板: 三端协同系统聚合面板 (ServerConsole Panel)"""
+"""agent-monitor: 三端协同系统 8000 聚合面板"""
 from gevent import monkey
 monkey.patch_all()
 import gevent
