@@ -19,12 +19,6 @@ KEY = os.environ.get('AGENT_KEY', '')
 SESSION = secrets.token_hex(16)
 COOKIE = 'agent_sess'
 
-# ===== 面板品牌配置（可被环境变量覆盖，去品牌化默认值）=====
-PANEL_NAME = os.environ.get('PANEL_NAME', '控制台')          # 页面标题/首页名称
-PANEL_LOGO = os.environ.get('PANEL_LOGO', '控')              # 首页 logo 字符（1-2 字符）
-PANEL_SUB = os.environ.get('PANEL_SUB', '服务器控制台')       # 副标题
-
-
 BAN_FILE = os.path.join(BASE, 'banned.json')
 BAN_SECONDS = 1800
 LOGIN_WINDOW = 30
@@ -268,12 +262,7 @@ def login():
 @app.route('/')
 def index():
     with open(os.path.join(BASE, 'index.html'), encoding='utf-8') as f:
-        html = f.read()
-    # 注入品牌配置（去品牌化：默认「控制台」，可通过环境变量覆盖）
-    html = html.replace('{{PANEL_NAME}}', PANEL_NAME)
-    html = html.replace('{{PANEL_LOGO}}', PANEL_LOGO)
-    html = html.replace('{{PANEL_SUB}}', PANEL_SUB)
-    return Response(html, mimetype='text/html', headers={'Cache-Control': 'no-cache'})
+        return Response(f.read(), mimetype='text/html', headers={'Cache-Control': 'no-cache'})
 
 
 @app.route('/api/status')
@@ -389,6 +378,14 @@ def save_services():
 
 
 VOICE_FILE = os.path.join(BASE, 'voice.json')
+VOICE_PROVIDERS = {
+    'qwen': {'name': '千问 Realtime', 'models': ['qwen-realtime', 'qwen2.5-omni-realtime'], 'base': 'https://dashscope.aliyuncs.com/api/v1'},
+    'glm': {'name': '智谱 GLM', 'models': ['glm-realtime'], 'base': 'https://open.bigmodel.cn/api/paas/v4'},
+    'aliyun': {'name': '阿里云百炼', 'models': ['cosyvoice'], 'base': 'https://dashscope.aliyuncs.com/api/v1'},
+    'tencent': {'name': '腾讯云', 'models': ['realtime-voice'], 'base': ''},
+    'openai': {'name': 'OpenAI Realtime', 'models': ['gpt-4o-realtime-preview', 'gpt-4o-mini-realtime-preview'], 'base': 'https://api.openai.com/v1'},
+    'custom': {'name': '自定义（OpenAI 兼容）', 'models': [], 'base': ''},
+}
 
 
 def load_voice():
@@ -396,12 +393,16 @@ def load_voice():
         with open(VOICE_FILE, encoding='utf-8') as f:
             return json.load(f)
     except Exception:
-        return {'apiKey': '', 'model': '', 'enabled': False}
+        return {'provider': 'qwen', 'apiKey': '', 'model': 'qwen-realtime', 'voice': '', 'lang': 'zh', 'enabled': False}
 
 
 def save_voice(d):
     with open(VOICE_FILE, 'w', encoding='utf-8') as f:
         json.dump(d, f, ensure_ascii=False, indent=2)
+    try:
+        os.chmod(VOICE_FILE, 0o600)
+    except Exception:
+        pass
 
 
 @app.route('/api/voice/config', methods=['GET'])
@@ -420,20 +421,53 @@ def set_voice():
     return jsonify({'ok': True, 'config': v})
 
 
+@app.route('/api/voice/providers', methods=['GET'])
+def voice_providers():
+    return jsonify({'providers': [{'id': k, 'name': v['name'], 'models': v['models']} for k, v in VOICE_PROVIDERS.items()]})
+
+
 @app.route('/ws/voice')
 def ws_voice():
     ws = request.environ.get('wsgi.websocket')
     if ws is None:
         return 'websocket required', 400
+    cfg = load_voice()
     try:
         while True:
             msg = ws.receive()
             if msg is None:
                 break
-            ws.send(msg)
+            # 文本 = JSON 控制帧
+            try:
+                import json as _json
+                frame = _json.loads(msg)
+            except Exception:
+                # 二进制/非 JSON：按音频透传（兼容旧客户端），回 ready
+                ws.send(_json.dumps({'type': 'audio', 'data': msg}))
+                continue
+            ftype = frame.get('type', '')
+            if ftype == 'start':
+                prov = frame.get('provider') or cfg.get('provider') or 'qwen'
+                key = cfg.get('apiKey', '')
+                if not key:
+                    ws.send(_json.dumps({'type': 'error', 'message': '未配置语音服务商 API Key，请在管理页语音设置中填写'}))
+                else:
+                    ws.send(_json.dumps({'type': 'ready', 'session_id': frame.get('session_id', ''), 'provider': prov, 'model': frame.get('model') or cfg.get('model', '')}))
+            elif ftype == 'audio':
+                ws.send(_json.dumps({'type': 'audio', 'data': frame.get('data', '')}))
+            elif ftype == 'interrupt':
+                ws.send(_json.dumps({'type': 'state', 'state': 'listening'}))
+            elif ftype == 'clear_history':
+                ws.send(_json.dumps({'type': 'cleared', 'ok': True}))
+            elif ftype == 'end':
+                ws.send(_json.dumps({'type': 'done', 'ok': True}))
+                break
+            else:
+                ws.send(_json.dumps({'type': 'error', 'message': 'unknown frame: ' + ftype}))
     except Exception:
         pass
     return ''
+
 
 
 # ================= Pi 编码助手 =================
@@ -1182,6 +1216,13 @@ def models_fetch():
     base = str(d['base_url']).strip().rstrip('/')
     if not base.startswith('http'):
         return jsonify({'error': '接口地址需以 http(s):// 开头'}), 400
+    # 地址归一化：若用户填了完整 chat/completions 或 completions 端点，自动取 API 根
+    for suffix in ('/chat/completions', '/completions', '/v1/chat/completions'):
+        if base.endswith(suffix):
+            base = base[:-len(suffix)]
+            break
+    if base.endswith('/chat') or base.endswith('/v1/chat'):
+        base = base[:base.rfind('/')]
     url = base + '/models'
     req = urllib.request.Request(url, headers={'Authorization': 'Bearer ' + d['api_key'].strip()})
     try:

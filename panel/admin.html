@@ -78,8 +78,13 @@ button.primary{width:100%;padding:10px;background:#2e7d32;color:#fff;border:none
 
 <div class="card">
 <h3>语音设置</h3>
-<label>千问 Realtime API Key</label><input id="v_key" type="password" placeholder="待接入，先留空">
+<label>服务商</label>
+<select id="v_provider" onchange="voiceProviderChange()"><option value="qwen">千问 Realtime</option><option value="glm">智谱 GLM</option><option value="aliyun">阿里云百炼</option><option value="tencent">腾讯云</option><option value="openai">OpenAI Realtime</option><option value="custom">自定义（OpenAI 兼容）</option></select>
+<label>API Key（可后填，留空时 App 会提示）</label><input id="v_key" type="password" placeholder="填写所选服务商的 Key">
 <label>模型名</label><input id="v_model" placeholder="如 qwen-realtime">
+<label>音色（可选）</label><input id="v_voice" placeholder="如 Cherry / 留空用默认">
+<label>语言</label>
+<select id="v_lang"><option value="zh">中文</option><option value="en">English</option><option value="auto">自动</option></select>
 <label style="display:flex;align-items:center;gap:8px;margin-top:12px;font-size:14px"><input type="checkbox" id="v_enabled" style="width:auto;margin:0"> 启用语音</label>
 <button class="primary" onclick="saveVoice()">保存语音设置</button>
 </div>
@@ -105,8 +110,9 @@ function $(id){return document.getElementById(id)}
 function toast(m){var t=$('toast');t.textContent=m;t.style.display='block';clearTimeout(window.__tt);window.__tt=setTimeout(function(){t.style.display='none'},1800)}
 function loadPalette(){var p=$('palette');p.innerHTML='';PALETTE.forEach(function(c){var d=document.createElement('div');d.className='sw'+(c===selectedColor?' sel':'');d.style.background=c;d.onclick=function(){selectedColor=c;loadPalette()};p.appendChild(d)})}
 function kindChange(){var k=$('f_kind').value;$('g_http').style.display=k==='http'?'block':'none';$('g_tcp').style.display=k==='tcp'?'block':'none'}
-function loadVoice(){fetch('/api/voice/config').then(function(r){return r.json()}).then(function(d){$('v_key').value=d.apiKey||'';$('v_model').value=d.model||'';$('v_enabled').checked=!!d.enabled})}
-function saveVoice(){var d={apiKey:$('v_key').value.trim(),model:$('v_model').value.trim(),enabled:$('v_enabled').checked};fetch('/api/voice/config',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(d)}).then(function(r){return r.json()}).then(function(){toast('已保存')})}
+function loadVoice(){fetch('/api/voice/config').then(function(r){return r.json()}).then(function(d){$('v_provider').value=d.provider||'qwen';$('v_key').value=d.apiKey||'';$('v_model').value=d.model||'';$('v_voice').value=d.voice||'';$('v_lang').value=d.lang||'zh';$('v_enabled').checked=!!d.enabled})}
+function saveVoice(){var d={provider:$('v_provider').value,apiKey:$('v_key').value.trim(),model:$('v_model').value.trim(),voice:$('v_voice').value.trim(),lang:$('v_lang').value,enabled:$('v_enabled').checked};fetch('/api/voice/config',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(d)}).then(function(r){return r.json()}).then(function(){toast('已保存')})}
+function voiceProviderChange(){var p=$('v_provider').value;var m={qwen:'qwen-realtime',glm:'glm-realtime',aliyun:'cosyvoice',tencent:'realtime-voice',openai:'gpt-4o-mini-realtime-preview',custom:''};$('v_model').value=m[p]||''}
 function load(){fetch('/api/services').then(function(r){return r.json()}).then(function(d){services=d.services||[];renderList()}).catch(function(){toast('加载失败')})}
 function saveAll(){return fetch('/api/services',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(services)}).then(function(r){return r.json()})}
 function renderList(){var l=$('list');l.innerHTML='';if(!services.length){l.innerHTML='<div class="hint">暂无服务</div>';return}services.forEach(function(s){var d=document.createElement('div');d.className='item';var ic=document.createElement('span');ic.className='ic';ic.style.background=s.color||'#3B82F6';ic.textContent=s.icon||(s.name?s.name.charAt(0):'?');var mid=document.createElement('div');mid.className='mid';mid.innerHTML='<div class="nm">'+s.name+'</div><div class="sub">'+s.sub+'</div>';var eb=document.createElement('button');eb.className='btn edit';eb.textContent='编辑';eb.onclick=function(){edit(s)};var db=document.createElement('button');db.className='btn del';db.textContent='删';db.onclick=function(){del(s.id,db)};d.appendChild(ic);d.appendChild(mid);d.appendChild(eb);d.appendChild(db);l.appendChild(d)})}
