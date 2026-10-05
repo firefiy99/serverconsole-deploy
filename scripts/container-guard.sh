@@ -18,3 +18,13 @@ for c in $CONTAINERS; do
     docker restart "$c" >> "$LOG" 2>&1
   fi
 done
+
+# napcat WebUI viewport 修复持久化：容器重建/升级后 index.html 会被重置，这里自动重新注入
+NAPCAT_INDEX=/app/napcat/static/index.html
+FIXED=/opt/napcat-webui-backup/index.html.fixed
+if docker inspect -f '{{.State.Running}}' napcat 2>/dev/null | grep -q true; then
+  if ! docker exec napcat sh -c "grep -q 'width=1280, initial-scale=1.0' $NAPCAT_INDEX" 2>/dev/null; then
+    echo "$(date '+%F %T') [napcat] viewport 已被重置，重新注入修复" >> "$LOG"
+    docker cp "$FIXED" napcat:$NAPCAT_INDEX >> "$LOG" 2>&1
+  fi
+fi
